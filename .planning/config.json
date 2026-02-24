@@ -1,0 +1,24 @@
+{
+  "project": "x402guard-dev",
+  "version": "1.0.0",
+  "created": "2026-02-24",
+  "workflow": {
+    "research": true,
+    "research_depth": "medium",
+    "commit_docs": true,
+    "auto_verify": true,
+    "parallel_agents": true
+  },
+  "models": {
+    "researcher": "sonnet",
+    "planner": "sonnet",
+    "executor": "sonnet",
+    "reviewer": "haiku",
+    "mapper": "haiku"
+  },
+  "conventions": {
+    "language": "rust+typescript",
+    "test_framework": "cargo-test+vitest",
+    "commit_style": "conventional"
+  }
+}
