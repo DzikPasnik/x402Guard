@@ -2,6 +2,7 @@ use std::net::SocketAddr;
 use std::time::Duration;
 
 use anyhow::Context;
+use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
@@ -11,6 +12,7 @@ mod error;
 mod handlers;
 mod middleware;
 mod models;
+mod repo;
 mod router;
 mod state;
 
@@ -20,12 +22,28 @@ async fn main() -> anyhow::Result<()> {
 
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
-        .with_target(true)
         .json()
+        .with_target(true)
         .init();
 
     let config = config::AppConfig::from_env().context("failed to load configuration")?;
 
+    // Database
+    let db = PgPoolOptions::new()
+        .max_connections(10)
+        .acquire_timeout(Duration::from_secs(5))
+        .connect(&config.database_url)
+        .await
+        .context("PostgreSQL connection failed")?;
+    info!("PostgreSQL connected");
+
+    sqlx::migrate!("./migrations")
+        .run(&db)
+        .await
+        .context("database migration failed")?;
+    info!("Migrations applied");
+
+    // Redis
     let redis = middleware::rate_limit::create_redis_client(&config.redis_url)
         .await
         .context("Redis connection failed")?;
@@ -40,6 +58,7 @@ async fn main() -> anyhow::Result<()> {
         config: config.clone(),
         redis,
         http_client,
+        db,
     };
 
     let addr = SocketAddr::new(config.host, config.port);

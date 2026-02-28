@@ -54,5 +54,8 @@ url = "2"
 base64 = "0.22"
 hex = "0.4"
 
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "migrate", "uuid", "chrono", "json"] }
+
 # Testing
 tokio-test = "0.4"

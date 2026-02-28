@@ -15,7 +15,10 @@ const MAX_BODY_SIZE: usize = 256 * 1024;
 pub fn create_router(state: AppState) -> Router {
     let api_routes = Router::new()
         .merge(handlers::health::routes())
-        .merge(handlers::proxy::routes());
+        .merge(handlers::proxy::routes())
+        .merge(handlers::agents::routes())
+        .merge(handlers::guardrail_rules::routes())
+        .merge(handlers::session_keys::routes());
 
     // Parse allowed origins from config (comma-separated).
     // SECURITY: If ALLOWED_ORIGINS is not set, default to localhost only (fail-closed).
