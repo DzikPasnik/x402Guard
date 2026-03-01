@@ -707,4 +707,114 @@ mod tests {
         let ata_bytes = ata.unwrap();
         assert!(!is_on_ed25519_curve(&ata_bytes));
     }
+
+    #[test]
+    fn test_ata_deterministic() {
+        let wallet = [10u8; 32];
+        let mint = [20u8; 32];
+
+        let ata1 = derive_ata(&wallet, &mint).unwrap();
+        let ata2 = derive_ata(&wallet, &mint).unwrap();
+        assert_eq!(ata1, ata2);
+    }
+
+    #[test]
+    fn test_ata_different_mints() {
+        let wallet = [10u8; 32];
+        let mint1 = [20u8; 32];
+        let mint2 = [30u8; 32];
+
+        let ata1 = derive_ata(&wallet, &mint1).unwrap();
+        let ata2 = derive_ata(&wallet, &mint2).unwrap();
+        assert_ne!(ata1, ata2);
+    }
+
+    #[test]
+    fn test_base58_known_value() {
+        // Token Program: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+        // This is a well-known Solana address, verifying our base58 codec matches.
+        let bytes = decode_pubkey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA").unwrap();
+        let re_encoded = encode_pubkey(&bytes);
+        assert_eq!(re_encoded, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+    }
+
+    #[test]
+    fn test_pubkey_too_long() {
+        // 51+ chars should be rejected by the length check
+        let long = "1".repeat(51);
+        assert!(decode_pubkey(&long).is_err());
+    }
+
+    #[test]
+    fn test_vault_state_inactive() {
+        // Verify is_active = false when byte is 0
+        let mut data = vec![0u8; MIN_VAULT_DATA_SIZE];
+        data[0..8].copy_from_slice(&[0xDD; 8]);
+        data[8..40].copy_from_slice(&[1u8; 32]);
+        data[40..72].copy_from_slice(&[2u8; 32]);
+        data[72..80].copy_from_slice(&1_000_000u64.to_le_bytes());
+        data[80..88].copy_from_slice(&10_000_000u64.to_le_bytes());
+        data[88..96].copy_from_slice(&0u64.to_le_bytes());
+        data[96..104].copy_from_slice(&0i64.to_le_bytes());
+        data[104..112].copy_from_slice(&0i64.to_le_bytes());
+        data[112..116].copy_from_slice(&0u32.to_le_bytes());
+        data[116] = 0; // is_active = false
+        data[117] = 255;
+
+        let vault = VaultState::from_account_data(&data).unwrap();
+        assert!(!vault.is_active);
+        assert_eq!(vault.bump, 255);
+    }
+
+    #[test]
+    fn test_vault_state_max_values() {
+        // Test with u64::MAX for spend fields
+        let mut data = vec![0u8; MIN_VAULT_DATA_SIZE];
+        data[0..8].copy_from_slice(&[0xEE; 8]);
+        data[8..40].copy_from_slice(&[1u8; 32]);
+        data[40..72].copy_from_slice(&[2u8; 32]);
+        data[72..80].copy_from_slice(&u64::MAX.to_le_bytes());
+        data[80..88].copy_from_slice(&u64::MAX.to_le_bytes());
+        data[88..96].copy_from_slice(&u64::MAX.to_le_bytes());
+        data[96..104].copy_from_slice(&i64::MAX.to_le_bytes());
+        data[104..112].copy_from_slice(&i64::MAX.to_le_bytes());
+        data[112..116].copy_from_slice(&0u32.to_le_bytes());
+        data[116] = 1;
+        data[117] = 0;
+
+        let vault = VaultState::from_account_data(&data).unwrap();
+        assert_eq!(vault.max_spend_per_tx, u64::MAX);
+        assert_eq!(vault.max_spend_per_day, u64::MAX);
+        assert_eq!(vault.spent_today, u64::MAX);
+        assert_eq!(vault.day_window_start, i64::MAX);
+        assert_eq!(vault.agent_expires_at, i64::MAX);
+    }
+
+    #[test]
+    fn test_pda_different_programs() {
+        let owner = [1u8; 32];
+
+        let (pda1, _) = derive_vault_pda(&owner, &[10u8; 32]).unwrap();
+        let (pda2, _) = derive_vault_pda(&owner, &[20u8; 32]).unwrap();
+
+        assert_ne!(pda1, pda2);
+    }
+
+    #[test]
+    fn test_vault_state_data_truncated_in_programs() {
+        // Have vec_len = 3 but not enough data for 3 pubkeys
+        let mut data = vec![0u8; MIN_VAULT_DATA_SIZE + 32]; // Only room for 1 program
+        data[0..8].copy_from_slice(&[0xFF; 8]);
+        data[8..40].copy_from_slice(&[1u8; 32]);
+        data[40..72].copy_from_slice(&[2u8; 32]);
+        data[72..80].copy_from_slice(&1u64.to_le_bytes());
+        data[80..88].copy_from_slice(&1u64.to_le_bytes());
+        data[88..96].copy_from_slice(&0u64.to_le_bytes());
+        data[96..104].copy_from_slice(&0i64.to_le_bytes());
+        data[104..112].copy_from_slice(&0i64.to_le_bytes());
+        // Claim 3 programs but only have room for 1
+        data[112..116].copy_from_slice(&3u32.to_le_bytes());
+
+        assert!(VaultState::from_account_data(&data).is_err());
+    }
 }
