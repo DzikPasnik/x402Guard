@@ -1,0 +1,20 @@
+[package]
+name = "x402-guard"
+version = "0.1.0"
+description = "On-chain PDA vault guard program for x402Guard — enforces per-tx limits, daily caps, program whitelists, and agent revocation on Solana USDC"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "x402_guard"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.30"
+anchor-spl = "0.30"
