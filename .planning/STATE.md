@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**Phase 3: Revoke System + Audit Logs + Solana Guard** — IN PROGRESS (Plans 1,3 of 4 complete)
+**Phase 3: Revoke System + Audit Logs + Solana Guard** — IN PROGRESS (Plans 1,2,3 of 4 complete)
 
 (Phase 0: Repository Setup & Infrastructure — COMPLETE)
 (Phase 1: Core x402 Proxy + Payment Verification — COMPLETE)
@@ -62,7 +62,7 @@
 - [x] 33 Phase 2 tests (15 guardrails + 8 session keys + 10 proxy integration)
 - [x] 52 total tests passing
 
-### Phase 3 — Revoke System + Audit Logs + Solana Guard (Plans 1,3 of 4)
+### Phase 3 — Revoke System + Audit Logs + Solana Guard (Plans 1,2,3 of 4)
 
 **Plan 1 — Audit Log System:**
 - [x] Immutable audit_log table with CHECK constraint on 10 event types
@@ -73,6 +73,17 @@
 - [x] Audit repo: insert_event + insert_batch (no UPDATE/DELETE functions)
 - [x] Audit emission: proxy (4 events), session keys (2 events), agents (1 event)
 - [x] 6 new unit tests (3 model + 3 writer) — 58 total tests passing
+
+**Plan 2 — Revoke System (Base EVM):**
+- [x] revoke_all_by_agent + _tx repo function (atomic batch UPDATE)
+- [x] deactivate + _tx agent repo function (idempotent)
+- [x] POST /api/v1/agents/:id/revoke-all endpoint with owner_address verification
+- [x] Case-insensitive Ethereum address comparison (EIP-55 checksum support)
+- [x] Atomic sqlx transaction: revoke all keys + deactivate agent
+- [x] AllSessionKeysRevoked + AgentDeactivated audit events
+- [x] EIP-7702 authorization data helper (zero-address delegation, non-custodial)
+- [x] RevokeAllRequest/RevokeAllResponse types with optional chain_id + nonce hint
+- [x] 10 new tests (4 revocation + 6 handler) — 68 total tests passing
 
 **Plan 3 — Solana Anchor Guard Program:**
 - [x] Separate Anchor workspace in solana/ (not part of root Cargo workspace)
@@ -106,6 +117,10 @@
 | 2026-03-01 | 64-byte reserved field in VaultState | Future upgrades without realloc |
 | 2026-03-01 | close_vault skips program whitelist | Owner must always recover funds; whitelist only restricts agent |
 | 2026-03-01 | Reserve-then-forward in Solana program | Matches EVM pattern — spent_today updated before CPI transfer |
+| 2026-03-01 | Owner address in revoke-all request body | No JWT yet; caller must know agent_id AND owner_address to prove ownership |
+| 2026-03-01 | Case-insensitive address comparison | EIP-55 checksum produces mixed-case addresses; must compare insensitively |
+| 2026-03-01 | Transaction executor _tx pattern | Composable atomic operations via sqlx::Executor generic param |
+| 2026-03-01 | Default chain_id 8453 (Base Mainnet) | Most common chain for x402Guard; dashboard can override |
 
 ## Resolved Security Debt
 
@@ -136,8 +151,8 @@ cd solana && anchor deploy --provider.cluster devnet
 
 ## Context for Next Session
 
-Phase 3 Plans 1 and 3 complete. Plan 1 = Audit Log System (58 proxy tests). Plan 3 = Solana Anchor Guard Program (18 files, 13 TS tests).
-Remaining Phase 3 plans: Plan 2 (Revoke System), Plan 4 (Integration Tests).
+Phase 3 Plans 1, 2, and 3 complete. Plan 1 = Audit Log System (58 proxy tests). Plan 2 = Revoke System (68 proxy tests). Plan 3 = Solana Anchor Guard Program (18 files, 13 TS tests).
+Remaining Phase 3 plan: Plan 4 (Integration Tests).
 
 ---
 *Updated: 2026-03-01*

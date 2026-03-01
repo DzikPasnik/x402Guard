@@ -109,6 +109,8 @@
 - Solana revoke zeroes agent access in ~400ms
 - Integration tests pass for both chains
 
+**Progress:** Plans 1,2,3 of 4 complete (Plan 4: Integration Tests remaining)
+
 **Estimated Effort:** 2 weeks
 **Requirements:** FR-3.4–FR-3.5, FR-4.1–FR-4.6, FR-6.1–FR-6.4
 
