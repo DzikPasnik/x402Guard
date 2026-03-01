@@ -21,6 +21,11 @@ pub enum AuditEventType {
     AllSessionKeysRevoked,
     AgentCreated,
     AgentDeactivated,
+    // Solana events (Phase 3, Plan 4)
+    SolanaVaultQueried,
+    SolanaWithdrawSubmitted,
+    SolanaWithdrawConfirmed,
+    SolanaWithdrawFailed,
 }
 
 impl AuditEventType {
@@ -38,6 +43,10 @@ impl AuditEventType {
             Self::AllSessionKeysRevoked => "all_session_keys_revoked",
             Self::AgentCreated => "agent_created",
             Self::AgentDeactivated => "agent_deactivated",
+            Self::SolanaVaultQueried => "solana_vault_queried",
+            Self::SolanaWithdrawSubmitted => "solana_withdraw_submitted",
+            Self::SolanaWithdrawConfirmed => "solana_withdraw_confirmed",
+            Self::SolanaWithdrawFailed => "solana_withdraw_failed",
         }
     }
 }
@@ -75,6 +84,10 @@ mod tests {
         assert_eq!(AuditEventType::AllSessionKeysRevoked.as_str(), "all_session_keys_revoked");
         assert_eq!(AuditEventType::AgentCreated.as_str(), "agent_created");
         assert_eq!(AuditEventType::AgentDeactivated.as_str(), "agent_deactivated");
+        assert_eq!(AuditEventType::SolanaVaultQueried.as_str(), "solana_vault_queried");
+        assert_eq!(AuditEventType::SolanaWithdrawSubmitted.as_str(), "solana_withdraw_submitted");
+        assert_eq!(AuditEventType::SolanaWithdrawConfirmed.as_str(), "solana_withdraw_confirmed");
+        assert_eq!(AuditEventType::SolanaWithdrawFailed.as_str(), "solana_withdraw_failed");
     }
 
     #[test]

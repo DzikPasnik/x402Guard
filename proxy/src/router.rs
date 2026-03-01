@@ -18,7 +18,8 @@ pub fn create_router(state: AppState) -> Router {
         .merge(handlers::proxy::routes())
         .merge(handlers::agents::routes())
         .merge(handlers::guardrail_rules::routes())
-        .merge(handlers::session_keys::routes());
+        .merge(handlers::session_keys::routes())
+        .merge(handlers::solana_vault::routes());
 
     // Parse allowed origins from config (comma-separated).
     // SECURITY: If ALLOWED_ORIGINS is not set, default to localhost only (fail-closed).
