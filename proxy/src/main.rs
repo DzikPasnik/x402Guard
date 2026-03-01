@@ -14,6 +14,7 @@ mod middleware;
 mod models;
 mod repo;
 mod router;
+mod services;
 mod state;
 
 #[tokio::main]
