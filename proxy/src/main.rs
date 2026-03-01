@@ -55,11 +55,16 @@ async fn main() -> anyhow::Result<()> {
         .build()
         .context("failed to build HTTP client")?;
 
+    // Audit writer: non-blocking background task for immutable audit log.
+    let audit = services::audit_writer::AuditWriter::spawn(db.clone());
+    info!("Audit writer started");
+
     let app_state = state::AppState {
         config: config.clone(),
         redis,
         http_client,
         db,
+        audit,
     };
 
     let addr = SocketAddr::new(config.host, config.port);
