@@ -120,3 +120,40 @@ pub async fn revoke(pool: &PgPool, id: Uuid, agent_id: Uuid) -> Result<()> {
     }
     Ok(())
 }
+
+/// Revoke ALL active session keys for the given agent in a single atomic UPDATE.
+///
+/// Returns the number of keys that were actually revoked (i.e., transitioned
+/// from `is_revoked = false` to `is_revoked = true`). Idempotent: calling
+/// again returns 0.
+///
+/// SECURITY: This runs inside the caller's transaction when used from the
+/// revoke-all endpoint, ensuring atomicity with agent deactivation.
+pub async fn revoke_all_by_agent(pool: &PgPool, agent_id: Uuid) -> Result<u64> {
+    let result = sqlx::query(
+        "UPDATE session_keys SET is_revoked = true WHERE agent_id = $1 AND is_revoked = false",
+    )
+    .bind(agent_id)
+    .execute(pool)
+    .await?;
+
+    Ok(result.rows_affected())
+}
+
+/// Revoke ALL active session keys for the given agent using a transactional executor.
+///
+/// Same as `revoke_all_by_agent` but accepts any sqlx Executor (e.g., a transaction)
+/// so callers can compose this with other writes atomically.
+pub async fn revoke_all_by_agent_tx<'e, E>(executor: E, agent_id: Uuid) -> Result<u64>
+where
+    E: sqlx::Executor<'e, Database = sqlx::Postgres>,
+{
+    let result = sqlx::query(
+        "UPDATE session_keys SET is_revoked = true WHERE agent_id = $1 AND is_revoked = false",
+    )
+    .bind(agent_id)
+    .execute(executor)
+    .await?;
+
+    Ok(result.rows_affected())
+}

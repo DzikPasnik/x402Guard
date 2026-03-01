@@ -53,3 +53,42 @@ pub async fn find_by_owner(pool: &PgPool, owner_address: &str) -> Result<Option<
     .await?;
     Ok(row.map(Into::into))
 }
+
+/// Deactivate an agent. Idempotent: succeeds even if already inactive.
+///
+/// Returns an error only if the agent does not exist (0 rows affected
+/// AND agent not found). This prevents silent no-ops on typo'd UUIDs.
+pub async fn deactivate(pool: &PgPool, agent_id: Uuid) -> Result<()> {
+    let result = sqlx::query(
+        "UPDATE agents SET is_active = false WHERE id = $1",
+    )
+    .bind(agent_id)
+    .execute(pool)
+    .await?;
+
+    if result.rows_affected() == 0 {
+        anyhow::bail!("agent {} not found", agent_id);
+    }
+    Ok(())
+}
+
+/// Deactivate an agent using a transactional executor.
+///
+/// Same as `deactivate` but accepts any sqlx Executor so callers can
+/// compose this with other writes atomically (e.g., revoke-all endpoint).
+pub async fn deactivate_tx<'e, E>(executor: E, agent_id: Uuid) -> Result<()>
+where
+    E: sqlx::Executor<'e, Database = sqlx::Postgres>,
+{
+    let result = sqlx::query(
+        "UPDATE agents SET is_active = false WHERE id = $1",
+    )
+    .bind(agent_id)
+    .execute(executor)
+    .await?;
+
+    if result.rows_affected() == 0 {
+        anyhow::bail!("agent {} not found", agent_id);
+    }
+    Ok(())
+}
