@@ -1,6 +1,8 @@
 import { verifySession } from '@/lib/dal'
 import { getAgentsByOwner } from '@/lib/proxy'
+import { fetchAgentSpendSummary } from '@/lib/spend-queries'
 import { AgentCard } from '@/components/dashboard/AgentCard'
+import type { AgentSpendSummary } from '@/lib/types'
 
 export default async function DashboardPage() {
   const { user } = await verifySession()
@@ -26,13 +28,22 @@ export default async function DashboardPage() {
   }
 
   let agents: Awaited<ReturnType<typeof getAgentsByOwner>> = []
+  let spendData: AgentSpendSummary[] = []
   let fetchError: string | null = null
 
   try {
-    agents = await getAgentsByOwner(walletAddress)
+    const [agentList, spendList] = await Promise.all([
+      getAgentsByOwner(walletAddress),
+      fetchAgentSpendSummary(walletAddress).catch(() => [] as AgentSpendSummary[]),
+    ])
+    agents = agentList
+    spendData = spendList
   } catch (err) {
     fetchError = err instanceof Error ? err.message : 'Failed to fetch agents'
   }
+
+  // Index spend data by agent ID for O(1) lookup
+  const spendByAgent = new Map(spendData.map((s) => [s.agent_id, s]))
 
   return (
     <div className="space-y-6">
@@ -56,7 +67,11 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {agents.map((agent) => (
-            <AgentCard key={agent.id} agent={agent} />
+            <AgentCard
+              key={agent.id}
+              agent={agent}
+              spend={spendByAgent.get(agent.id) ?? null}
+            />
           ))}
         </div>
       )}
