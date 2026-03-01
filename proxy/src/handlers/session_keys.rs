@@ -49,7 +49,7 @@ pub struct RevokeAllRequest {
 }
 
 /// Response for the revoke-all endpoint.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RevokeAllResponse {
     pub success: bool,
     /// Number of session keys that were revoked (transitioned from active to revoked).
@@ -266,4 +266,121 @@ pub fn routes() -> Router<AppState> {
             "/agents/{agent_id}/revoke-all",
             post(revoke_all),
         )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // --- RevokeAllResponse serialization tests ---
+
+    #[test]
+    fn revoke_all_response_serializes_correctly() {
+        let auth_data = serde_json::json!({
+            "chain_id": 8453,
+            "address": "0x0000000000000000000000000000000000000000",
+            "nonce": null,
+            "message": "Sign to revoke all EIP-7702 delegation for this EOA"
+        });
+
+        let response = RevokeAllResponse {
+            success: true,
+            keys_revoked: 5,
+            agent_deactivated: true,
+            on_chain_authorization: Some(auth_data),
+        };
+
+        let json = serde_json::to_value(&response).expect("serialization should succeed");
+        assert_eq!(json["success"], true);
+        assert_eq!(json["keys_revoked"], 5);
+        assert_eq!(json["agent_deactivated"], true);
+        assert!(json["on_chain_authorization"].is_object());
+        assert_eq!(
+            json["on_chain_authorization"]["chain_id"],
+            8453
+        );
+        assert_eq!(
+            json["on_chain_authorization"]["address"],
+            "0x0000000000000000000000000000000000000000"
+        );
+    }
+
+    #[test]
+    fn revoke_all_response_with_zero_keys() {
+        let response = RevokeAllResponse {
+            success: true,
+            keys_revoked: 0,
+            agent_deactivated: true,
+            on_chain_authorization: Some(serde_json::json!({})),
+        };
+
+        let json = serde_json::to_value(&response).expect("serialization should succeed");
+        assert_eq!(json["keys_revoked"], 0);
+        assert_eq!(json["agent_deactivated"], true);
+    }
+
+    #[test]
+    fn revoke_all_response_roundtrip() {
+        let auth_data = crate::services::revocation::create_revoke_authorization_data(
+            84532,
+            Some(42),
+        );
+
+        let response = RevokeAllResponse {
+            success: true,
+            keys_revoked: 3,
+            agent_deactivated: true,
+            on_chain_authorization: Some(auth_data),
+        };
+
+        // Serialize and deserialize to verify the shape is correct.
+        let json_str = serde_json::to_string(&response).expect("serialize");
+        let deserialized: RevokeAllResponse =
+            serde_json::from_str(&json_str).expect("deserialize");
+
+        assert_eq!(deserialized.success, true);
+        assert_eq!(deserialized.keys_revoked, 3);
+        assert_eq!(deserialized.agent_deactivated, true);
+
+        let auth = deserialized.on_chain_authorization.unwrap();
+        assert_eq!(auth["chain_id"], 84532);
+        assert_eq!(auth["nonce"], 42);
+    }
+
+    #[test]
+    fn revoke_all_request_deserializes_minimal() {
+        let json = r#"{"owner_address": "0xABCDEF1234567890ABCDEF1234567890ABCDEF12"}"#;
+        let req: RevokeAllRequest = serde_json::from_str(json).expect("deserialize");
+
+        assert_eq!(req.owner_address, "0xABCDEF1234567890ABCDEF1234567890ABCDEF12");
+        assert!(req.chain_id.is_none());
+        assert!(req.eoa_nonce_hint.is_none());
+    }
+
+    #[test]
+    fn revoke_all_request_deserializes_full() {
+        let json = r#"{
+            "owner_address": "0xABCDEF1234567890ABCDEF1234567890ABCDEF12",
+            "chain_id": 84532,
+            "eoa_nonce_hint": 7
+        }"#;
+        let req: RevokeAllRequest = serde_json::from_str(json).expect("deserialize");
+
+        assert_eq!(req.owner_address, "0xABCDEF1234567890ABCDEF1234567890ABCDEF12");
+        assert_eq!(req.chain_id, Some(84532));
+        assert_eq!(req.eoa_nonce_hint, Some(7));
+    }
+
+    #[test]
+    fn revoke_all_response_without_authorization() {
+        let response = RevokeAllResponse {
+            success: true,
+            keys_revoked: 1,
+            agent_deactivated: true,
+            on_chain_authorization: None,
+        };
+
+        let json = serde_json::to_value(&response).expect("serialization should succeed");
+        assert!(json["on_chain_authorization"].is_null());
+    }
 }
