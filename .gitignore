@@ -21,6 +21,10 @@ dashboard/.env.local
 *.swp
 *.swo
 
+# Claude Code
+.claude/
+.agents/
+
 # OS
 .DS_Store
 Thumbs.db
