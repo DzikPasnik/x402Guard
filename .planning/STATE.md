@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**Phase 3: Revoke System + Audit Logs + Solana Guard** — NEXT
+**Phase 3: Revoke System + Audit Logs + Solana Guard** — IN PROGRESS (Plans 1,3 of 4 complete)
 
 (Phase 0: Repository Setup & Infrastructure — COMPLETE)
 (Phase 1: Core x402 Proxy + Payment Verification — COMPLETE)
@@ -62,6 +62,16 @@
 - [x] 33 Phase 2 tests (15 guardrails + 8 session keys + 10 proxy integration)
 - [x] 52 total tests passing
 
+### Phase 3 — Revoke System + Audit Logs + Solana Guard (Plan 1 of 4)
+- [x] Immutable audit_log table with CHECK constraint on 10 event types
+- [x] BEFORE UPDATE/DELETE trigger prevents audit tampering
+- [x] Indexes: (agent_id, created_at), (event_type, created_at), (session_key_id) partial
+- [x] AuditEvent model: 10 event types with as_str() for DB compatibility
+- [x] AuditWriter background service: unbounded mpsc channel, batch drain (64 max)
+- [x] Audit repo: insert_event + insert_batch (no UPDATE/DELETE functions)
+- [x] Audit emission: proxy (4 events), session keys (2 events), agents (1 event)
+- [x] 6 new unit tests (3 model + 3 writer) — 58 total tests passing
+
 ## Key Decisions Log
 
 | Date | Decision | Rationale |
@@ -77,6 +87,9 @@
 | 2026-02-28 | Reserve-then-forward spend pattern | TOCTOU prevention — record spend atomically before forwarding payment |
 | 2026-02-28 | Checked integer casts everywhere | No `as i64`/`as u64` — prevents silent truncation in financial code |
 | 2026-02-28 | Cross-agent auth on all mutations | rule_id AND agent_id required — prevents agent A modifying agent B's rules |
+| 2026-03-01 | Unbounded mpsc for audit writes | Bounded channel would add back-pressure to proxy hot path; events are ~200 bytes |
+| 2026-03-01 | Dual-layer immutability (app + DB) | No UPDATE/DELETE repo functions + DB trigger — defense in depth |
+| 2026-03-01 | Batch drain up to 64 events | Balances throughput with latency; simple sequential inserts within batch |
 
 ## Resolved Security Debt
 
@@ -94,8 +107,8 @@ MSYS_NO_PATHCONV=1 docker run --rm -m 4g -v "D:/x402Guard:/app" -w /app rust:1.8
 
 ## Context for Next Session
 
-Phase 2 is complete with Level-10 security audit fixes applied and 52/52 tests passing.
-Phase 3 covers: one-click revoke (EIP-7702 zero-address delegation), audit logs (append-only), Solana Anchor guard program.
+Phase 3 Plan 1 (Audit Log System) complete — 58/58 tests passing.
+Remaining Phase 3 plans: Plan 2 (Revoke System), Plan 3 (Solana Guard Program), Plan 4 (Integration Tests).
 
 ---
-*Updated: 2026-02-28*
+*Updated: 2026-03-01*
