@@ -1,4 +1,4 @@
-//! Session key CRUD endpoints.
+//! Session key CRUD endpoints + revoke-all.
 
 use axum::extract::{Path, State};
 use axum::routing::{get, post};
@@ -11,6 +11,7 @@ use crate::error::AppError;
 use crate::models::audit_event::{AuditEvent, AuditEventType};
 use crate::models::session_key::SessionKey;
 use crate::repo;
+use crate::services::revocation;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -32,6 +33,32 @@ pub struct SessionKeyResponse {
 pub struct SessionKeysListResponse {
     pub success: bool,
     pub data: Vec<SessionKey>,
+}
+
+/// Request body for the revoke-all endpoint.
+///
+/// SECURITY [H2]: `owner_address` is required to prove ownership.
+/// The caller must know both the agent_id (path) and the owner_address (body).
+#[derive(Debug, Deserialize)]
+pub struct RevokeAllRequest {
+    pub owner_address: String,
+    /// Optional chain ID for EIP-7702 authorization data (defaults to Base Mainnet 8453).
+    pub chain_id: Option<u64>,
+    /// Optional EOA nonce hint. If omitted, the client fetches it from RPC.
+    pub eoa_nonce_hint: Option<u64>,
+}
+
+/// Response for the revoke-all endpoint.
+#[derive(Debug, Serialize)]
+pub struct RevokeAllResponse {
+    pub success: bool,
+    /// Number of session keys that were revoked (transitioned from active to revoked).
+    pub keys_revoked: u64,
+    /// Whether the agent was deactivated (always true on success).
+    pub agent_deactivated: bool,
+    /// Unsigned EIP-7702 authorization data for client-side on-chain revocation.
+    /// The proxy NEVER signs this --- the user/dashboard must sign with their EOA key.
+    pub on_chain_authorization: Option<serde_json::Value>,
 }
 
 async fn create_session_key(
@@ -144,6 +171,87 @@ async fn revoke_session_key(
     }))
 }
 
+/// Revoke ALL session keys for an agent and deactivate the agent.
+///
+/// SECURITY [H2]: Requires owner_address in the request body to prove
+/// ownership. The caller must know both the agent_id (URL path) AND the
+/// owner_address. Returns 401 if the owner_address does not match.
+///
+/// ATOMICITY: The key revocation and agent deactivation run in a single
+/// sqlx transaction. Either both succeed or neither does.
+///
+/// NON-CUSTODIAL: The response includes unsigned EIP-7702 authorization
+/// data. The proxy never signs on-chain transactions.
+async fn revoke_all(
+    State(state): State<AppState>,
+    Path(agent_id): Path<Uuid>,
+    Json(req): Json<RevokeAllRequest>,
+) -> Result<Json<RevokeAllResponse>, AppError> {
+    if req.owner_address.is_empty() {
+        return Err(AppError::BadRequest("owner_address is required".into()));
+    }
+
+    // 1. Verify agent exists.
+    let agent = repo::agents::find_by_id(&state.db, agent_id)
+        .await
+        .map_err(AppError::Internal)?
+        .ok_or_else(|| AppError::NotFound(format!("agent {} not found", agent_id)))?;
+
+    // 2. SECURITY [H2]: Verify caller owns the agent.
+    //    Case-insensitive comparison for Ethereum addresses (mixed-case checksums).
+    if !agent.owner_address.eq_ignore_ascii_case(&req.owner_address) {
+        return Err(AppError::Unauthorized(
+            "owner_address does not match agent owner".into(),
+        ));
+    }
+
+    // 3. Atomic transaction: revoke all keys + deactivate agent.
+    let mut tx = state.db.begin().await.map_err(|e| AppError::Internal(e.into()))?;
+
+    let keys_revoked = repo::session_keys::revoke_all_by_agent_tx(&mut *tx, agent_id)
+        .await
+        .map_err(AppError::Internal)?;
+
+    repo::agents::deactivate_tx(&mut *tx, agent_id)
+        .await
+        .map_err(AppError::Internal)?;
+
+    tx.commit().await.map_err(|e| AppError::Internal(e.into()))?;
+
+    // 4. AUDIT: Emit AllSessionKeysRevoked AFTER successful commit.
+    //    SECURITY: Audit event cannot be suppressed --- emitted before returning.
+    state.audit.emit(AuditEvent {
+        agent_id: Some(agent_id),
+        session_key_id: None,
+        event_type: AuditEventType::AllSessionKeysRevoked,
+        metadata: serde_json::json!({
+            "keys_revoked": keys_revoked,
+            "owner_address": req.owner_address,
+        }),
+    });
+
+    // 5. Also emit AgentDeactivated for completeness.
+    state.audit.emit(AuditEvent {
+        agent_id: Some(agent_id),
+        session_key_id: None,
+        event_type: AuditEventType::AgentDeactivated,
+        metadata: serde_json::json!({
+            "triggered_by": "revoke_all",
+        }),
+    });
+
+    // 6. Generate unsigned EIP-7702 authorization data.
+    let chain_id = req.chain_id.unwrap_or(8453); // Default: Base Mainnet
+    let auth_data = revocation::create_revoke_authorization_data(chain_id, req.eoa_nonce_hint);
+
+    Ok(Json(RevokeAllResponse {
+        success: true,
+        keys_revoked,
+        agent_deactivated: true,
+        on_chain_authorization: Some(auth_data),
+    }))
+}
+
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route(
@@ -153,5 +261,9 @@ pub fn routes() -> Router<AppState> {
         .route(
             "/agents/{agent_id}/session-keys/{key_id}",
             get(get_session_key).delete(revoke_session_key),
+        )
+        .route(
+            "/agents/{agent_id}/revoke-all",
+            post(revoke_all),
         )
 }
