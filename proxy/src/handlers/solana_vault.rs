@@ -137,7 +137,7 @@ async fn get_vault_status(
     let allowed_programs: Vec<String> = vault
         .allowed_programs
         .iter()
-        .map(|pk| solana_rpc::encode_pubkey(pk))
+        .map(solana_rpc::encode_pubkey)
         .collect();
 
     // AUDIT: SolanaVaultQueried
