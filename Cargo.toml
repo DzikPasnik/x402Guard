@@ -54,6 +54,10 @@ url = "2"
 base64 = "0.22"
 hex = "0.4"
 
+# Crypto / Solana (pure Rust — no C deps, no serde conflicts)
+sha2 = "0.10"
+curve25519-dalek = { version = "4", default-features = false }
+
 # Database
 sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "migrate", "uuid", "chrono", "json"] }
 
