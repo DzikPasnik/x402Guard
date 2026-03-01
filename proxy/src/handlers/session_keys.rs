@@ -79,7 +79,7 @@ async fn create_session_key(
     // Verify agent exists
     repo::agents::find_by_id(&state.db, agent_id)
         .await
-        .map_err(|e| AppError::Internal(e))?
+        .map_err(AppError::Internal)?
         .ok_or_else(|| AppError::NotFound(format!("agent {} not found", agent_id)))?;
 
     let key = repo::session_keys::create(
@@ -91,7 +91,7 @@ async fn create_session_key(
         req.expires_at,
     )
     .await
-    .map_err(|e| AppError::Internal(e))?;
+    .map_err(AppError::Internal)?;
 
     // AUDIT: SessionKeyCreated — log public key and limits (no secrets).
     state.audit.emit(AuditEvent {
@@ -118,7 +118,7 @@ async fn list_session_keys(
 ) -> Result<Json<SessionKeysListResponse>, AppError> {
     let keys = repo::session_keys::find_active_by_agent(&state.db, agent_id)
         .await
-        .map_err(|e| AppError::Internal(e))?;
+        .map_err(AppError::Internal)?;
 
     Ok(Json(SessionKeysListResponse {
         success: true,
@@ -132,7 +132,7 @@ async fn get_session_key(
 ) -> Result<Json<SessionKeyResponse>, AppError> {
     let key = repo::session_keys::find_by_id(&state.db, key_id)
         .await
-        .map_err(|e| AppError::Internal(e))?
+        .map_err(AppError::Internal)?
         .ok_or_else(|| AppError::NotFound(format!("session key {} not found", key_id)))?;
 
     // SECURITY [H2]: Verify the session key belongs to the requested agent.
@@ -154,7 +154,7 @@ async fn revoke_session_key(
     // SECURITY [H2]: Pass agent_id to prevent cross-agent key revocation.
     repo::session_keys::revoke(&state.db, key_id, agent_id)
         .await
-        .map_err(|e| AppError::Internal(e))?;
+        .map_err(AppError::Internal)?;
 
     // AUDIT: SessionKeyRevoked
     state.audit.emit(AuditEvent {
@@ -338,9 +338,9 @@ mod tests {
         let deserialized: RevokeAllResponse =
             serde_json::from_str(&json_str).expect("deserialize");
 
-        assert_eq!(deserialized.success, true);
+        assert!(deserialized.success);
         assert_eq!(deserialized.keys_revoked, 3);
-        assert_eq!(deserialized.agent_deactivated, true);
+        assert!(deserialized.agent_deactivated);
 
         let auth = deserialized.on_chain_authorization.unwrap();
         assert_eq!(auth["chain_id"], 84532);

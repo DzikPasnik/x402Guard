@@ -43,12 +43,12 @@ async fn create_rule(
     // Verify agent exists
     repo::agents::find_by_id(&state.db, agent_id)
         .await
-        .map_err(|e| AppError::Internal(e))?
+        .map_err(AppError::Internal)?
         .ok_or_else(|| AppError::NotFound(format!("agent {} not found", agent_id)))?;
 
     let rule = repo::guardrails::create(&state.db, agent_id, &req.rule_type)
         .await
-        .map_err(|e| AppError::Internal(e))?;
+        .map_err(AppError::Internal)?;
 
     Ok(Json(RuleResponse {
         success: true,
@@ -63,7 +63,7 @@ async fn list_rules(
 ) -> Result<Json<RulesListResponse>, AppError> {
     let rules = repo::guardrails::find_active_by_agent(&state.db, agent_id)
         .await
-        .map_err(|e| AppError::Internal(e))?;
+        .map_err(AppError::Internal)?;
 
     Ok(Json(RulesListResponse {
         success: true,
@@ -79,7 +79,7 @@ async fn update_rule_with_body(
     // SECURITY [H2]: Pass agent_id to prevent cross-agent rule modification.
     let rule = repo::guardrails::update(&state.db, rule_id, agent_id, &req.rule_type, req.is_active)
         .await
-        .map_err(|e| AppError::Internal(e))?;
+        .map_err(AppError::Internal)?;
 
     Ok(Json(RuleResponse {
         success: true,
@@ -95,7 +95,7 @@ async fn deactivate_rule(
     // SECURITY [H2]: Pass agent_id to prevent cross-agent rule deactivation.
     repo::guardrails::deactivate(&state.db, rule_id, agent_id)
         .await
-        .map_err(|e| AppError::Internal(e))?;
+        .map_err(AppError::Internal)?;
 
     Ok(Json(RuleResponse {
         success: true,

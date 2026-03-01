@@ -141,10 +141,12 @@ pub struct VaultState {
     pub max_spend_per_tx: u64,
     pub max_spend_per_day: u64,
     pub spent_today: u64,
+    #[allow(dead_code)]
     pub day_window_start: i64,
     pub agent_expires_at: i64,
     pub allowed_programs: Vec<[u8; 32]>,
     pub is_active: bool,
+    #[allow(dead_code)]
     pub bump: u8,
 }
 

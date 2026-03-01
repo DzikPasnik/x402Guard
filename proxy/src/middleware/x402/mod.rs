@@ -33,6 +33,7 @@ pub fn parse_payment_payload(header: &str) -> Result<PaymentPayload, AppError> {
 }
 
 /// Encode a value as base64url JSON (for building headers in tests/forwarding).
+#[allow(dead_code)]
 pub fn encode_to_header<T: serde::Serialize>(value: &T) -> Result<String, AppError> {
     let json = serde_json::to_vec(value)
         .map_err(|e| AppError::Internal(anyhow::anyhow!("failed to serialize: {e}")))?;

@@ -7,7 +7,9 @@ use serde::Deserialize;
 pub struct AppConfig {
     pub host: IpAddr,
     pub port: u16,
+    #[allow(dead_code)]
     pub base_sepolia_rpc_url: String,
+    #[allow(dead_code)]
     pub base_mainnet_rpc_url: String,
     pub database_url: String,
     pub redis_url: String,
@@ -84,6 +86,7 @@ impl AppConfig {
     }
 
     /// Returns true if all Solana config fields are set.
+    #[allow(dead_code)]
     pub fn solana_enabled(&self) -> bool {
         self.solana_rpc_url.is_some()
             && self.solana_program_id.is_some()

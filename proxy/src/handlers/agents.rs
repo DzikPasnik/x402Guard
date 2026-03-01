@@ -38,7 +38,7 @@ async fn create_agent(
 
     let agent = repo::agents::create(&state.db, &req.name, &req.owner_address)
         .await
-        .map_err(|e| AppError::Internal(e))?;
+        .map_err(AppError::Internal)?;
 
     // AUDIT: AgentCreated — log name and owner address (public info, no secrets).
     state.audit.emit(AuditEvent {
@@ -64,7 +64,7 @@ async fn get_agent(
 ) -> Result<Json<AgentResponse>, AppError> {
     let agent = repo::agents::find_by_id(&state.db, id)
         .await
-        .map_err(|e| AppError::Internal(e))?
+        .map_err(AppError::Internal)?
         .ok_or_else(|| AppError::NotFound(format!("agent {} not found", id)))?;
 
     Ok(Json(AgentResponse {

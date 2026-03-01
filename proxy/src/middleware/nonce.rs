@@ -3,8 +3,6 @@
 //! Prevents replay attacks by ensuring each EIP-3009 nonce is used at most once
 //! within the payment's validity window.
 
-use redis::AsyncCommands;
-
 /// Redis-backed nonce store for replay prevention.
 #[derive(Clone)]
 pub struct NonceStore {
@@ -41,4 +39,5 @@ impl NonceStore {
 }
 
 /// Key prefix used for nonce storage in Redis.
+#[allow(dead_code)]
 pub const NONCE_KEY_PREFIX: &str = "x402:nonce:";

@@ -113,6 +113,7 @@ pub async fn find_active_by_agent(pool: &PgPool, agent_id: Uuid) -> Result<Vec<G
     rows.into_iter().map(row_to_rule).collect()
 }
 
+#[allow(dead_code)]
 pub async fn find_by_id(pool: &PgPool, rule_id: Uuid) -> Result<Option<GuardrailRule>> {
     let row: Option<GuardrailRow> = sqlx::query_as(
         "SELECT id, agent_id, rule_type, rule_params, is_active, created_at \

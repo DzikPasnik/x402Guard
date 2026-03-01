@@ -10,7 +10,6 @@ use alloy::sol_types::SolStruct;
 use crate::error::AppError;
 use crate::middleware::x402::types::{PaymentPayload, PaymentRequirements, VerifiedPayment};
 
-/// EIP-712 domain and struct definitions for USDC TransferWithAuthorization.
 sol! {
     /// EIP-712 typed struct for TransferWithAuthorization (EIP-3009).
     #[derive(Debug)]

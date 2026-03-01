@@ -91,6 +91,7 @@ pub struct VerifiedPayment {
     /// The nonce used (for deduplication).
     pub nonce: B256,
     /// Network identifier.
+    #[allow(dead_code)]
     pub network: String,
 }
 

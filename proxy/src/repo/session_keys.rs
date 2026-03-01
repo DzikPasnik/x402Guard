@@ -129,6 +129,7 @@ pub async fn revoke(pool: &PgPool, id: Uuid, agent_id: Uuid) -> Result<()> {
 ///
 /// SECURITY: This runs inside the caller's transaction when used from the
 /// revoke-all endpoint, ensuring atomicity with agent deactivation.
+#[allow(dead_code)]
 pub async fn revoke_all_by_agent(pool: &PgPool, agent_id: Uuid) -> Result<u64> {
     let result = sqlx::query(
         "UPDATE session_keys SET is_revoked = true WHERE agent_id = $1 AND is_revoked = false",

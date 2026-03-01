@@ -7,7 +7,9 @@ use redis::Client;
 #[derive(Debug, Clone)]
 pub struct RateLimitResult {
     pub allowed: bool,
+    #[allow(dead_code)]
     pub remaining: u32,
+    #[allow(dead_code)]
     pub retry_after_secs: Option<u64>,
 }
 
@@ -103,10 +105,12 @@ impl RateLimiter {
 
 /// Global rate limit configuration (FR-5.3).
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct GlobalRateLimitConfig {
     pub requests_per_second: u32,
 }
 
+#[allow(dead_code)]
 impl GlobalRateLimitConfig {
     pub fn new(requests_per_second: u32) -> Self {
         Self { requests_per_second }

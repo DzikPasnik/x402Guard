@@ -126,7 +126,7 @@ async fn forward_request(
     if let Some(sk_id) = session_key_id {
         let session_key = repo::session_keys::find_by_id(&state.db, sk_id)
             .await
-            .map_err(|e| AppError::Internal(e))?
+            .map_err(AppError::Internal)?
             .ok_or_else(|| AppError::NotFound(format!("session key {} not found", sk_id)))?;
 
         let target_contract = requirements.extra.get("contract").and_then(|v| v.as_str());
@@ -140,7 +140,7 @@ async fn forward_request(
         // Verify agent exists and is active
         let agent = repo::agents::find_by_id(&state.db, aid)
             .await
-            .map_err(|e| AppError::Internal(e))?
+            .map_err(AppError::Internal)?
             .ok_or_else(|| AppError::NotFound(format!("agent {} not found", aid)))?;
 
         // SECURITY [M6]: Reject payments for deactivated agents
@@ -151,12 +151,12 @@ async fn forward_request(
         // Load active rules for this agent
         let rules = repo::guardrails::find_active_by_agent(&state.db, aid)
             .await
-            .map_err(|e| AppError::Internal(e))?;
+            .map_err(AppError::Internal)?;
 
         // Query rolling 24h spend from ledger
         let daily_spent = repo::spend_ledger::sum_last_24h(&state.db, aid)
             .await
-            .map_err(|e| AppError::Internal(e))?;
+            .map_err(AppError::Internal)?;
 
         // Evaluate all rules (fail-closed)
         if let Err(violation) = guardrails::evaluate(&rules, &verified, &requirements, daily_spent) {
@@ -188,7 +188,7 @@ async fn forward_request(
     let is_new = nonce_store
         .check_and_store(&nonce_hex, nonce_ttl)
         .await
-        .map_err(|e| AppError::Internal(e.into()))?;
+        .map_err(AppError::Internal)?;
 
     if !is_new {
         return Err(AppError::BadRequest(format!(
@@ -201,7 +201,7 @@ async fn forward_request(
     let rate_result = limiter
         .check("global", state.config.rate_limit_rps, 1)
         .await
-        .map_err(|e| AppError::Internal(e.into()))?;
+        .map_err(AppError::Internal)?;
 
     if !rate_result.allowed {
         return Err(AppError::RateLimited);
@@ -220,7 +220,7 @@ async fn forward_request(
             &nonce_hex,
         )
         .await
-        .map_err(|e| AppError::Internal(e))?;
+        .map_err(AppError::Internal)?;
 
         // Atomically increment session key spend counter (if applicable).
         // The SQL uses WHERE spent + $2 <= max_spend for atomic enforcement.
@@ -644,8 +644,7 @@ async fn forward_solana_request(
 
             let is_allowed = vault
                 .allowed_programs
-                .iter()
-                .any(|allowed| *allowed == dest_bytes);
+                .contains(&dest_bytes);
 
             if !is_allowed {
                 return Err(AppError::GuardrailViolation(format!(

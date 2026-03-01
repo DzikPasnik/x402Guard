@@ -44,6 +44,7 @@ pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Agent>> {
     Ok(row.map(Into::into))
 }
 
+#[allow(dead_code)]
 pub async fn find_by_owner(pool: &PgPool, owner_address: &str) -> Result<Option<Agent>> {
     let row: Option<AgentRow> = sqlx::query_as(
         "SELECT id, name, owner_address, is_active, created_at FROM agents WHERE owner_address = $1",
@@ -58,6 +59,7 @@ pub async fn find_by_owner(pool: &PgPool, owner_address: &str) -> Result<Option<
 ///
 /// Returns an error only if the agent does not exist (0 rows affected
 /// AND agent not found). This prevents silent no-ops on typo'd UUIDs.
+#[allow(dead_code)]
 pub async fn deactivate(pool: &PgPool, agent_id: Uuid) -> Result<()> {
     let result = sqlx::query(
         "UPDATE agents SET is_active = false WHERE id = $1",
