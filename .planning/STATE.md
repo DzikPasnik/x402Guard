@@ -62,7 +62,9 @@
 - [x] 33 Phase 2 tests (15 guardrails + 8 session keys + 10 proxy integration)
 - [x] 52 total tests passing
 
-### Phase 3 — Revoke System + Audit Logs + Solana Guard (Plan 1 of 4)
+### Phase 3 — Revoke System + Audit Logs + Solana Guard (Plans 1,3 of 4)
+
+**Plan 1 — Audit Log System:**
 - [x] Immutable audit_log table with CHECK constraint on 10 event types
 - [x] BEFORE UPDATE/DELETE trigger prevents audit tampering
 - [x] Indexes: (agent_id, created_at), (event_type, created_at), (session_key_id) partial
@@ -71,6 +73,16 @@
 - [x] Audit repo: insert_event + insert_batch (no UPDATE/DELETE functions)
 - [x] Audit emission: proxy (4 events), session keys (2 events), agents (1 event)
 - [x] 6 new unit tests (3 model + 3 writer) — 58 total tests passing
+
+**Plan 3 — Solana Anchor Guard Program:**
+- [x] Separate Anchor workspace in solana/ (not part of root Cargo workspace)
+- [x] VaultState PDA account: owner, agent, per-tx limit, daily cap, spent_today, whitelist, expiry, bump, reserved
+- [x] 6 instructions: initialize_vault, deposit, guarded_withdraw, update_rules, revoke_agent, close_vault
+- [x] 8-point fail-closed guardrails in guarded_withdraw (active, agent, expiry, amount, per-tx, daily reset, daily cap, whitelist)
+- [x] All arithmetic checked (checked_add/checked_sub, no as casts)
+- [x] Reserve-then-forward pattern in guarded_withdraw (spent_today updated before CPI)
+- [x] WithdrawExecuted + AgentRevoked events for off-chain audit
+- [x] 13 TypeScript integration tests (Mocha/Chai)
 
 ## Key Decisions Log
 
@@ -90,6 +102,10 @@
 | 2026-03-01 | Unbounded mpsc for audit writes | Bounded channel would add back-pressure to proxy hot path; events are ~200 bytes |
 | 2026-03-01 | Dual-layer immutability (app + DB) | No UPDATE/DELETE repo functions + DB trigger — defense in depth |
 | 2026-03-01 | Batch drain up to 64 events | Balances throughput with latency; simple sequential inserts within batch |
+| 2026-03-01 | Separate Cargo workspace for Solana | BPF target conflicts with proxy workspace; serde pin isolation |
+| 2026-03-01 | 64-byte reserved field in VaultState | Future upgrades without realloc |
+| 2026-03-01 | close_vault skips program whitelist | Owner must always recover funds; whitelist only restricts agent |
+| 2026-03-01 | Reserve-then-forward in Solana program | Matches EVM pattern — spent_today updated before CPI transfer |
 
 ## Resolved Security Debt
 
@@ -105,10 +121,23 @@ MSYS_NO_PATHCONV=1 docker run --rm -m 4g -v "D:/x402Guard:/app" -w /app rust:1.8
   bash -c "apt-get update -qq && apt-get install -y -qq pkg-config libssl-dev > /dev/null 2>&1 && CARGO_BUILD_JOBS=2 cargo test 2>&1"
 ```
 
+## Build Commands — Solana
+
+```bash
+# Anchor build (requires Solana CLI + Anchor CLI)
+cd solana && anchor build
+
+# Anchor test (runs localnet validator + tests)
+cd solana && anchor test
+
+# Deploy to devnet
+cd solana && anchor deploy --provider.cluster devnet
+```
+
 ## Context for Next Session
 
-Phase 3 Plan 1 (Audit Log System) complete — 58/58 tests passing.
-Remaining Phase 3 plans: Plan 2 (Revoke System), Plan 3 (Solana Guard Program), Plan 4 (Integration Tests).
+Phase 3 Plans 1 and 3 complete. Plan 1 = Audit Log System (58 proxy tests). Plan 3 = Solana Anchor Guard Program (18 files, 13 TS tests).
+Remaining Phase 3 plans: Plan 2 (Revoke System), Plan 4 (Integration Tests).
 
 ---
 *Updated: 2026-03-01*
