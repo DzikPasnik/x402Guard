@@ -10,6 +10,7 @@ use crate::error::AppError;
 use crate::middleware::nonce::NonceStore;
 use crate::middleware::rate_limit::RateLimiter;
 use crate::middleware::{eip7702, guardrails, x402};
+use crate::models::audit_event::{AuditEvent, AuditEventType};
 use crate::repo;
 use crate::state::AppState;
 
@@ -59,6 +60,15 @@ async fn forward_request(
     validate_target_url(&req.target_url)?;
 
     tracing::info!(target_url = %req.target_url, "proxy request received");
+
+    // AUDIT: ProxyRequestReceived — fire-and-forget via mpsc channel.
+    // SECURITY: Only log target_url (identifier), never secrets or payment payload.
+    state.audit.emit(AuditEvent {
+        agent_id: req.agent_id.as_deref().and_then(|s| s.parse().ok()),
+        session_key_id: req.session_key_id.as_deref().and_then(|s| s.parse().ok()),
+        event_type: AuditEventType::ProxyRequestReceived,
+        metadata: serde_json::json!({ "target_url": req.target_url }),
+    });
 
     // 2. Parse x402 headers
     let requirements = x402::parse_payment_requirements(&req.x402_requirements)?;
@@ -148,7 +158,19 @@ async fn forward_request(
             .map_err(|e| AppError::Internal(e))?;
 
         // Evaluate all rules (fail-closed)
-        guardrails::evaluate(&rules, &verified, &requirements, daily_spent)?;
+        if let Err(violation) = guardrails::evaluate(&rules, &verified, &requirements, daily_spent) {
+            // AUDIT: GuardrailViolation — record which rule blocked and why.
+            state.audit.emit(AuditEvent {
+                agent_id: Some(aid),
+                session_key_id,
+                event_type: AuditEventType::GuardrailViolation,
+                metadata: serde_json::json!({
+                    "target_url": req.target_url,
+                    "violation": violation.to_string(),
+                }),
+            });
+            return Err(violation);
+        }
 
         tracing::info!(agent_id = %aid, rules_count = rules.len(), "guardrails passed");
     }
@@ -231,6 +253,18 @@ async fn forward_request(
         .unwrap_or(serde_json::Value::Null);
 
     if status.is_success() {
+        // AUDIT: ProxyRequestForwarded — successful upstream response.
+        state.audit.emit(AuditEvent {
+            agent_id,
+            session_key_id,
+            event_type: AuditEventType::ProxyRequestForwarded,
+            metadata: serde_json::json!({
+                "target_url": req.target_url,
+                "upstream_status": status.as_u16(),
+                "payment_amount": payment_amount,
+            }),
+        });
+
         Ok(Json(ProxyResponse {
             success: true,
             tx_hash: None,
@@ -238,6 +272,18 @@ async fn forward_request(
             data: Some(body),
         }))
     } else {
+        // AUDIT: ProxyRequestFailed — upstream returned non-2xx.
+        state.audit.emit(AuditEvent {
+            agent_id,
+            session_key_id,
+            event_type: AuditEventType::ProxyRequestFailed,
+            metadata: serde_json::json!({
+                "target_url": req.target_url,
+                "upstream_status": status.as_u16(),
+                "payment_amount": payment_amount,
+            }),
+        });
+
         // TODO(Phase 3): Consider compensating the spend reservation on upstream failure.
         // For now, we err on the side of over-counting spend (fail-closed for safety).
         Ok(Json(ProxyResponse {

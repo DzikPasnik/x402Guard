@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::error::AppError;
+use crate::models::audit_event::{AuditEvent, AuditEventType};
 use crate::models::session_key::SessionKey;
 use crate::repo;
 use crate::state::AppState;
@@ -65,6 +66,18 @@ async fn create_session_key(
     .await
     .map_err(|e| AppError::Internal(e))?;
 
+    // AUDIT: SessionKeyCreated — log public key and limits (no secrets).
+    state.audit.emit(AuditEvent {
+        agent_id: Some(agent_id),
+        session_key_id: Some(key.id),
+        event_type: AuditEventType::SessionKeyCreated,
+        metadata: serde_json::json!({
+            "public_key": req.public_key,
+            "max_spend": req.max_spend,
+            "expires_at": req.expires_at.to_rfc3339(),
+        }),
+    });
+
     Ok(Json(SessionKeyResponse {
         success: true,
         data: Some(key),
@@ -115,6 +128,14 @@ async fn revoke_session_key(
     repo::session_keys::revoke(&state.db, key_id, agent_id)
         .await
         .map_err(|e| AppError::Internal(e))?;
+
+    // AUDIT: SessionKeyRevoked
+    state.audit.emit(AuditEvent {
+        agent_id: Some(agent_id),
+        session_key_id: Some(key_id),
+        event_type: AuditEventType::SessionKeyRevoked,
+        metadata: serde_json::json!({}),
+    });
 
     Ok(Json(SessionKeyResponse {
         success: true,

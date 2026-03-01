@@ -8,6 +8,7 @@ use uuid::Uuid;
 
 use crate::error::AppError;
 use crate::models::agent::Agent;
+use crate::models::audit_event::{AuditEvent, AuditEventType};
 use crate::repo;
 use crate::state::AppState;
 
@@ -38,6 +39,17 @@ async fn create_agent(
     let agent = repo::agents::create(&state.db, &req.name, &req.owner_address)
         .await
         .map_err(|e| AppError::Internal(e))?;
+
+    // AUDIT: AgentCreated — log name and owner address (public info, no secrets).
+    state.audit.emit(AuditEvent {
+        agent_id: Some(agent.id),
+        session_key_id: None,
+        event_type: AuditEventType::AgentCreated,
+        metadata: serde_json::json!({
+            "name": agent.name,
+            "owner_address": agent.owner_address,
+        }),
+    });
 
     Ok(Json(AgentResponse {
         success: true,
