@@ -20,7 +20,7 @@ Read these at session start. Update after every PR or correction.
 - **serde**: pinned to `=1.0.219` (serde_core split breaks alloy-consensus)
 - **alloy features**: `["sol-types", "signers", "signer-local"]` — no "full" (avoids blst C dep)
 - **Dashboard**: Next.js 16 in `dashboard/` — `npm run build` for verification
-- **CI**: Node 22 LTS (not 20 — npm lock compatibility with local npm 11)
+- **CI**: Node 22 LTS, `rm -f package-lock.json && npm install` (cross-platform lock file issue)
 - **Solana**: Separate Anchor workspace in `solana/` (not part of root Cargo workspace)
 
 ## Security Rules (DeFi-Critical)
@@ -50,7 +50,8 @@ Read these at session start. Update after every PR or correction.
 - Never mark complete without proving it works (run tests, check build).
 
 ## Learned Lessons
-- `package-lock.json` from npm 11 (Node 24) breaks `npm ci` on Node 20. Keep CI on Node 22+.
+- **npm cross-platform lock files**: Lock files contain platform-specific optional deps (lightningcss, swc). Dev on Windows = win32 binaries in lock. CI on Linux needs linux binaries. Solution: CI deletes lock and runs `npm install` fresh. NEVER use `npm ci` when developing cross-platform.
+- `package-lock.json` from npm 11 (Node 24) has lockfileVersion incompatible with npm 10 (Node 20/22). Keep CI on Node 22+.
 - Next.js 16: `params` is Promise (must `await`), `useActionState` from 'react' (NOT react-dom).
 - shadcn/ui v3 uses unified `radix-ui` package (not old `@radix-ui/react-*` split).
 - Write tool requires reading file first if it already exists.
