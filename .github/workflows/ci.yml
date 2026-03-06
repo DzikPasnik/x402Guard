@@ -69,3 +69,116 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-for-ci"
           NEXT_PUBLIC_PROXY_URL: "http://localhost:3402"
+
+  examples-ts:
+    name: Examples (TypeScript)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install and test @x402guard/core
+        working-directory: examples/core
+        run: |
+          npm install
+          npx tsc --noEmit
+          npx vitest run
+
+      - name: Install and test @elizaos/plugin-x402guard
+        working-directory: examples/elizaos
+        run: |
+          npm install
+          npx tsc --noEmit
+          npx vitest run
+
+      - name: Install and test @x402guard/cod3x-adapter
+        working-directory: examples/cod3x
+        run: |
+          npm install
+          npx tsc --noEmit
+          npx vitest run
+
+  examples-python:
+    name: Examples (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install and test x402guard-game-plugin
+        working-directory: examples/virtuals
+        run: |
+          pip install -e ".[dev]"
+          python -m pytest tests/unit/ -x -v
+
+  examples-integration:
+    name: Examples (Integration)
+    runs-on: ubuntu-latest
+    needs: [examples-ts, examples-python]
+    if: vars.X402GUARD_INTEGRATION == '1'
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: x402guard
+          POSTGRES_PASSWORD: x402guard
+          POSTGRES_DB: x402guard
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build and start x402Guard proxy
+        run: |
+          docker compose up -d proxy
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3402/api/v1/health
+
+      - name: Run TypeScript integration tests
+        working-directory: examples/elizaos
+        env:
+          X402GUARD_INTEGRATION: "1"
+          X402GUARD_PROXY_URL: "http://localhost:3402"
+        run: |
+          npm install
+          npx vitest run tests/integration/
+
+      - name: Run Python integration tests
+        working-directory: examples/virtuals
+        env:
+          X402GUARD_INTEGRATION: "1"
+          X402GUARD_PROXY_URL: "http://localhost:3402"
+        run: |
+          pip install -e ".[dev]"
+          python -m pytest tests/integration/ -x -v
