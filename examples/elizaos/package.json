@@ -1,0 +1,39 @@
+{
+  "name": "@elizaos/plugin-x402guard",
+  "version": "0.1.0",
+  "description": "x402Guard guardrail proxy integration plugin for ElizaOS agents",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:integration": "X402GUARD_INTEGRATION=1 vitest run tests/integration",
+    "typecheck": "tsc --noEmit",
+    "demo": "npx tsx demo/demo.ts"
+  },
+  "peerDependencies": {
+    "@elizaos/core": "*"
+  },
+  "dependencies": {
+    "@x402guard/core": "file:../core"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
+    "tsx": "^4.0.0",
+    "viem": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}
