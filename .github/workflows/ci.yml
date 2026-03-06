@@ -79,11 +79,12 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install and test @x402guard/core
+      - name: Install and build @x402guard/core
         working-directory: examples/core
         run: |
           npm install
           npx tsc --noEmit
+          npx tsup
           npx vitest run
 
       - name: Install and test @elizaos/plugin-x402guard
