@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+*.egg-info/
+
+# Build artifacts
+dist/
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Package lock files (cross-platform issues - regenerate per environment)
+package-lock.json
