@@ -1,0 +1,5 @@
+"""Root conftest.py that adds src/ to PYTHONPATH for test discovery."""
+import sys
+import os
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
