@@ -1,0 +1,38 @@
+{
+  "name": "@x402guard/cod3x-adapter",
+  "version": "0.1.0",
+  "description": "Cod3x ToolChain protocol adapter for x402Guard — guarded DeFi payments",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "demo": "npx tsx demo/demo.ts"
+  },
+  "dependencies": {
+    "@x402guard/core": "file:../core",
+    "viem": "^2.0.0"
+  },
+  "optionalDependencies": {
+    "@cod3x/sdk": "*",
+    "@cod3x/ethers": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
