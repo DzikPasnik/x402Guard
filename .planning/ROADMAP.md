@@ -162,6 +162,14 @@
 - Cod3x example compiles and has working README
 - All READMEs include step-by-step setup
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 05-01-PLAN.md -- Shared @x402guard/core TypeScript SDK (client, types, errors, retry)
+- [ ] 05-02-PLAN.md -- ElizaOS plugin (Action + Provider + demo + README)
+- [ ] 05-03-PLAN.md -- Virtuals Protocol GAME Python plugin (client, functions, demo + README)
+- [ ] 05-04-PLAN.md -- Cod3x adapter (protocol adapter + demo + README + CI)
+
 **Estimated Effort:** 1 week
 **Requirements:** FR-8.1–FR-8.4
 
