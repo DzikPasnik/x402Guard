@@ -8,7 +8,7 @@ pub mod state;
 use instructions::*;
 
 // Program ID placeholder — replace with actual keypair-derived ID after `anchor keys list`
-declare_id!("x402GuardProgramAAAAAAAAAAAAAAAAAAAAAAAAA");
+declare_id!("CCiocBgtgKu4x2JfiRgKaYTkt4HVGonEmperieZ3VXfj");
 
 /// x402-guard: On-chain PDA vault guard for Solana USDC.
 ///
