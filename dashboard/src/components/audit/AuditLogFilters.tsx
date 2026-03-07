@@ -59,14 +59,14 @@ export function AuditLogFilters({ agents, value, onChange }: AuditLogFiltersProp
     <div className="flex flex-wrap items-center gap-3">
       {/* Agent filter */}
       <Select
-        value={value.agentId ?? ''}
-        onValueChange={(v) => onChange({ ...value, agentId: v || undefined, cursorId: undefined })}
+        value={value.agentId ?? '__all__'}
+        onValueChange={(v) => onChange({ ...value, agentId: v === '__all__' ? undefined : v, cursorId: undefined })}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="All Agents" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Agents</SelectItem>
+          <SelectItem value="__all__">All Agents</SelectItem>
           {agents.map((agent) => (
             <SelectItem key={agent.id} value={agent.id}>
               {agent.name}{!agent.is_active ? ' (inactive)' : ''}
