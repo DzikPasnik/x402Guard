@@ -11,6 +11,26 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  secrets-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: GitLeaks - Scan for hardcoded secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check .gitignore compliance
+        run: |
+          echo "Verifying sensitive files are gitignored..."
+          for f in .env .env.local .env.production dashboard/.env.local; do
+            git check-ignore -q "$f" 2>/dev/null && echo "OK: $f is gitignored" || echo "WARNING: $f NOT in gitignore"
+          done
+
   rust:
     name: Rust (check / test / clippy)
     runs-on: ubuntu-latest
