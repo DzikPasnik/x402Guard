@@ -36,7 +36,9 @@ export function WalletAuthButton() {
         </Button>
       )}
       {error && (
-        <p className="text-sm text-destructive max-w-xs text-center">{error}</p>
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-2 max-w-xs">
+          <p className="text-sm font-medium text-destructive text-center">{error}</p>
+        </div>
       )}
     </div>
   )
