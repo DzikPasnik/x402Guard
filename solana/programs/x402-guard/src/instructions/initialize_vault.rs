@@ -4,7 +4,7 @@ use anchor_spl::{
     token::{Mint, Token, TokenAccount},
 };
 
-use crate::constants::{MAX_ALLOWED_PROGRAMS, VAULT_SEED};
+use crate::constants::{MAX_ALLOWED_PROGRAMS, USDC_MINT_DEVNET, USDC_MINT_MAINNET, VAULT_SEED};
 use crate::errors::GuardError;
 use crate::state::VaultState;
 
@@ -35,7 +35,8 @@ pub struct InitializeVault<'info> {
     )]
     pub vault_token_account: Account<'info, TokenAccount>,
 
-    /// USDC mint account. Validated by the ATA constraint above.
+    /// USDC mint account.
+    /// SECURITY [CRITICAL-5]: Validated against known USDC mint addresses below.
     pub usdc_mint: Account<'info, Mint>,
 
     pub token_program: Program<'info, Token>,
@@ -62,6 +63,15 @@ pub struct InitializeVaultParams {
 ///
 /// Validates all parameters before writing state. Fail-closed on any invalid input.
 pub fn handler(ctx: Context<InitializeVault>, params: InitializeVaultParams) -> Result<()> {
+    // SECURITY [CRITICAL-5]: Validate USDC mint is the official devnet or mainnet address.
+    // An attacker could pass a fake mint to create a vault that tracks worthless tokens
+    // while the real USDC remains unprotected by guardrails.
+    let mint_key = ctx.accounts.usdc_mint.key();
+    require!(
+        mint_key == USDC_MINT_DEVNET || mint_key == USDC_MINT_MAINNET,
+        GuardError::InvalidUsdcMint
+    );
+
     // Validate agent is not the default (zero) key
     require!(
         params.agent != Pubkey::default(),

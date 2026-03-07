@@ -136,6 +136,9 @@ async fn forward_request(
     }
 
     // 7. Guardrails evaluation (if agent_id present)
+    // SECURITY: We store rules here for use in step 10 (atomic spend recording).
+    let mut agent_rules: Option<Vec<crate::models::guardrail::GuardrailRule>> = None;
+
     if let Some(aid) = agent_id {
         // Verify agent exists and is active
         let agent = repo::agents::find_by_id(&state.db, aid)
@@ -153,7 +156,7 @@ async fn forward_request(
             .await
             .map_err(AppError::Internal)?;
 
-        // Query rolling 24h spend from ledger
+        // Query rolling 24h spend from ledger (for non-daily-limit rules evaluation)
         let daily_spent = repo::spend_ledger::sum_last_24h(&state.db, aid)
             .await
             .map_err(AppError::Internal)?;
@@ -174,6 +177,7 @@ async fn forward_request(
         }
 
         tracing::info!(agent_id = %aid, rules_count = rules.len(), "guardrails passed");
+        agent_rules = Some(rules);
     }
 
     // 8. Nonce deduplication
@@ -207,20 +211,33 @@ async fn forward_request(
         return Err(AppError::RateLimited);
     }
 
-    // 10. SECURITY [C1+C2+C3]: Reserve spend BEFORE forwarding (atomic).
-    // This prevents TOCTOU race conditions where concurrent requests bypass limits.
-    // If Postgres fails, the payment is NOT forwarded — fail-closed.
+    // 10. SECURITY [CRITICAL-1]: Atomic spend reservation with daily limit enforcement.
+    // Uses INSERT...SELECT WHERE subquery to atomically check 24h sum AND insert.
+    // This eliminates the TOCTOU window where concurrent requests could bypass limits.
     if let Some(aid) = agent_id {
-        // Record spend in ledger — MUST succeed before forwarding
-        repo::spend_ledger::record_spend(
+        // Extract daily limit from guardrail rules (if MaxSpendPerDay is configured)
+        let daily_limit = agent_rules
+            .as_deref()
+            .and_then(guardrails::extract_daily_limit);
+
+        // Atomic record: checks daily limit and inserts in one SQL statement.
+        // Returns false if daily limit would be exceeded — spend NOT recorded.
+        let spend_ok = repo::spend_ledger::record_spend_atomic(
             &state.db,
             aid,
             session_key_id,
             payment_amount,
             &nonce_hex,
+            daily_limit,
         )
         .await
         .map_err(AppError::Internal)?;
+
+        if !spend_ok {
+            return Err(AppError::GuardrailViolation(
+                "MaxSpendPerDay exceeded (atomic check)".into(),
+            ));
+        }
 
         // Atomically increment session key spend counter (if applicable).
         // The SQL uses WHERE spent + $2 <= max_spend for atomic enforcement.

@@ -1,3 +1,4 @@
+pub mod api_key;
 pub mod eip7702;
 pub mod guardrails;
 pub mod nonce;

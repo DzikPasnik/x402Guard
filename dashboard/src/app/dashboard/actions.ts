@@ -4,11 +4,81 @@ import { revalidatePath } from 'next/cache'
 import { verifySession } from '@/lib/dal'
 
 const PROXY_BASE = process.env.PROXY_URL ?? 'http://localhost:3402'
+const MANAGEMENT_API_KEY = process.env.MANAGEMENT_API_KEY ?? ''
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 type ActionResult = { success: true } | { error: string }
 type FormActionResult = ActionResult | null
+
+// ─── Auth Helpers ───────────────────────────────────────────────────
+
+/** Headers for authenticated proxy API calls. */
+function apiHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (MANAGEMENT_API_KEY) {
+    headers['X-Api-Key'] = MANAGEMENT_API_KEY
+  }
+  return headers
+}
+
+/** Headers for non-body requests (DELETE, GET). */
+function apiHeadersNoBody(): Record<string, string> {
+  const headers: Record<string, string> = {}
+  if (MANAGEMENT_API_KEY) {
+    headers['X-Api-Key'] = MANAGEMENT_API_KEY
+  }
+  return headers
+}
+
+/**
+ * SECURITY [CRITICAL-3]: Verify the authenticated user owns the agent.
+ *
+ * Fetches the agent from the proxy API and compares the owner_address
+ * with the session user's wallet_address. Prevents IDOR attacks where
+ * any authenticated user could modify another user's agents.
+ *
+ * In dev mode (DEV_SKIP_AUTH=true), ownership is not checked.
+ */
+async function assertAgentOwnership(agentId: string): Promise<{ error?: string }> {
+  // Dev mode: skip ownership check (mock user has no real wallet)
+  if (process.env.DEV_SKIP_AUTH === 'true') {
+    return {}
+  }
+
+  const { user } = await verifySession()
+  const walletAddress = user.user_metadata?.wallet_address as string | undefined
+
+  if (!walletAddress) {
+    return { error: 'No wallet address in session' }
+  }
+
+  try {
+    const res = await fetch(`${PROXY_BASE}/api/v1/agents/${agentId}`, {
+      headers: apiHeadersNoBody(),
+    })
+
+    if (!res.ok) {
+      return { error: 'Agent not found' }
+    }
+
+    const body = await res.json() as { data?: { owner_address?: string } }
+    const ownerAddress = body.data?.owner_address
+
+    if (!ownerAddress) {
+      return { error: 'Agent has no owner' }
+    }
+
+    // Case-insensitive comparison for Ethereum addresses (mixed-case checksums)
+    if (ownerAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+      return { error: 'You do not own this agent' }
+    }
+
+    return {}
+  } catch {
+    return { error: 'Failed to verify agent ownership' }
+  }
+}
 
 // ─── Guardrail Rules ───────────────────────────────────────────────
 
@@ -20,6 +90,10 @@ export async function createGuardrailRule(
   await verifySession()
 
   if (!UUID_RE.test(agentId)) return { error: 'Invalid agent ID' }
+
+  // SECURITY [CRITICAL-3]: Verify ownership before mutation
+  const ownerCheck = await assertAgentOwnership(agentId)
+  if (ownerCheck.error) return { error: ownerCheck.error }
 
   const ruleType = formData.get('rule_type') as string | null
   const value = formData.get('value') as string | null
@@ -64,7 +138,7 @@ export async function createGuardrailRule(
   try {
     const res = await fetch(`${PROXY_BASE}/api/v1/agents/${agentId}/rules`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: apiHeaders(),
       body: JSON.stringify({ rule_type: ruleType, rule_params: ruleParams }),
     })
 
@@ -89,9 +163,14 @@ export async function deleteGuardrailRule(
   if (!UUID_RE.test(agentId)) return { error: 'Invalid agent ID' }
   if (!UUID_RE.test(ruleId)) return { error: 'Invalid rule ID' }
 
+  // SECURITY [CRITICAL-3]: Verify ownership before mutation
+  const ownerCheck = await assertAgentOwnership(agentId)
+  if (ownerCheck.error) return { error: ownerCheck.error }
+
   try {
     const res = await fetch(`${PROXY_BASE}/api/v1/agents/${agentId}/rules/${ruleId}`, {
       method: 'DELETE',
+      headers: apiHeadersNoBody(),
     })
 
     if (!res.ok) {
@@ -117,6 +196,10 @@ export async function createSessionKey(
 
   if (!UUID_RE.test(agentId)) return { error: 'Invalid agent ID' }
 
+  // SECURITY [CRITICAL-3]: Verify ownership before mutation
+  const ownerCheck = await assertAgentOwnership(agentId)
+  if (ownerCheck.error) return { error: ownerCheck.error }
+
   const publicKey = (formData.get('public_key') as string | null)?.trim()
   const maxSpendStr = formData.get('max_spend') as string | null
   const contractsStr = formData.get('allowed_contracts') as string | null
@@ -139,7 +222,7 @@ export async function createSessionKey(
   try {
     const res = await fetch(`${PROXY_BASE}/api/v1/agents/${agentId}/session-keys`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: apiHeaders(),
       body: JSON.stringify({
         public_key: publicKey,
         max_spend: Math.round(maxSpend * 1_000_000),
@@ -169,9 +252,14 @@ export async function revokeSessionKey(
   if (!UUID_RE.test(agentId)) return { error: 'Invalid agent ID' }
   if (!UUID_RE.test(keyId)) return { error: 'Invalid key ID' }
 
+  // SECURITY [CRITICAL-3]: Verify ownership before mutation
+  const ownerCheck = await assertAgentOwnership(agentId)
+  if (ownerCheck.error) return { error: ownerCheck.error }
+
   try {
     const res = await fetch(`${PROXY_BASE}/api/v1/agents/${agentId}/session-keys/${keyId}`, {
       method: 'DELETE',
+      headers: apiHeadersNoBody(),
     })
 
     if (!res.ok) {
@@ -195,10 +283,14 @@ export async function revokeAllSessionKeys(
   if (!UUID_RE.test(agentId)) return { error: 'Invalid agent ID' }
   if (!ownerAddress) return { error: 'Owner address is required' }
 
+  // SECURITY [CRITICAL-3]: Verify ownership before mutation
+  const ownerCheck = await assertAgentOwnership(agentId)
+  if (ownerCheck.error) return { error: ownerCheck.error }
+
   try {
     const res = await fetch(`${PROXY_BASE}/api/v1/agents/${agentId}/revoke-all`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: apiHeaders(),
       body: JSON.stringify({ owner_address: ownerAddress }),
     })
 

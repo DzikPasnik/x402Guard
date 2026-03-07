@@ -71,6 +71,19 @@ fn check_max_spend_per_tx(value: U256, limit: u64) -> Result<(), AppError> {
     Ok(())
 }
 
+/// Extract the MaxSpendPerDay limit from a set of rules (if any active rule exists).
+pub fn extract_daily_limit(rules: &[GuardrailRule]) -> Option<u64> {
+    rules.iter().find_map(|r| {
+        if !r.is_active {
+            return None;
+        }
+        match &r.rule_type {
+            RuleType::MaxSpendPerDay { limit } => Some(*limit),
+            _ => None,
+        }
+    })
+}
+
 /// Reject if daily_spent + payment.value > limit.
 fn check_max_spend_per_day(value: U256, daily_spent: u64, limit: u64) -> Result<(), AppError> {
     let total = U256::from(daily_spent) + value;

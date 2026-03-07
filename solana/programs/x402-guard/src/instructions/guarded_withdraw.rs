@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
-use crate::constants::{SECONDS_PER_DAY, VAULT_SEED};
+use crate::constants::{SECONDS_PER_DAY, USDC_MINT_DEVNET, USDC_MINT_MAINNET, VAULT_SEED};
 use crate::errors::GuardError;
 use crate::state::VaultState;
 
@@ -36,7 +36,8 @@ pub struct GuardedWithdraw<'info> {
     )]
     pub destination_token_account: Account<'info, TokenAccount>,
 
-    /// USDC mint — validated by token account constraints.
+    /// USDC mint — validated against known USDC mint addresses below.
+    /// SECURITY [CRITICAL-5]: Also validated by token account constraints.
     pub usdc_mint: Account<'info, Mint>,
 
     pub token_program: Program<'info, Token>,
@@ -68,6 +69,15 @@ pub struct WithdrawExecuted {
 /// 7. spent_today + amount <= max_spend_per_day (checked arithmetic)
 /// 8. Program whitelist (if non-empty)
 pub fn handler(ctx: Context<GuardedWithdraw>, amount: u64) -> Result<()> {
+    // SECURITY [CRITICAL-5]: Validate USDC mint on every withdrawal.
+    // Even though initialize_vault checks this, we verify again to prevent
+    // attacks where the mint account is swapped between init and withdraw.
+    let mint_key = ctx.accounts.usdc_mint.key();
+    require!(
+        mint_key == USDC_MINT_DEVNET || mint_key == USDC_MINT_MAINNET,
+        GuardError::InvalidUsdcMint
+    );
+
     let vault = &mut ctx.accounts.vault;
     let now = Clock::get()?.unix_timestamp;
 
@@ -113,11 +123,26 @@ pub fn handler(ctx: Context<GuardedWithdraw>, amount: u64) -> Result<()> {
         GuardError::ExceedsDailyCap
     );
 
-    // 8. Program whitelist — if non-empty, destination owner must be whitelisted
+    // 8. Destination whitelist — if non-empty, destination authority must be whitelisted.
+    //
+    // SECURITY [CRITICAL-6]: `allowed_programs` contains whitelisted destination
+    // AUTHORITIES (wallets/PDAs that control the destination token account), NOT
+    // program IDs. The check verifies that the authority of the destination token
+    // account is in the whitelist. This prevents funds from being sent to
+    // unauthorized wallets/PDAs.
+    //
+    // NOTE: `TokenAccount.owner` in SPL Token is the AUTHORITY (the pubkey that
+    // can transfer tokens from this account), not the Solana account owner
+    // (which is always the Token Program for all token accounts).
     if !vault.allowed_programs.is_empty() {
-        let dest_owner = ctx.accounts.destination_token_account.owner;
+        let dest_authority = ctx.accounts.destination_token_account.owner;
+        // Also check the destination token account address itself,
+        // to support whitelisting by token account address.
+        let dest_address = ctx.accounts.destination_token_account.key();
+        let is_whitelisted = vault.allowed_programs.contains(&dest_authority)
+            || vault.allowed_programs.contains(&dest_address);
         require!(
-            vault.allowed_programs.contains(&dest_owner),
+            is_whitelisted,
             GuardError::ProgramNotWhitelisted
         );
     }

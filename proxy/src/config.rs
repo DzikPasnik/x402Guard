@@ -15,6 +15,11 @@ pub struct AppConfig {
     pub redis_url: String,
     pub rate_limit_rps: u32,
 
+    // ── Management API authentication ──
+    /// Shared secret for authenticating management API requests (CRUD endpoints).
+    /// SECURITY: Must be set in production. If unset, management API is DENIED (fail-closed).
+    pub management_api_key: Option<String>,
+
     // ── Solana (optional — only needed when proxying Solana x402 payments) ──
     /// Solana RPC URL (devnet or mainnet-beta). None = Solana support disabled.
     /// SECURITY: Must be HTTPS for mainnet (validated at load time).
@@ -53,6 +58,9 @@ impl AppConfig {
             .unwrap_or_else(|_| "1000".into())
             .parse()?;
 
+        // Management API key (required for production, optional for local dev)
+        let management_api_key = std::env::var("MANAGEMENT_API_KEY").ok();
+
         // Solana config (all optional — set all three to enable Solana support)
         let solana_rpc_url = std::env::var("SOLANA_RPC_URL").ok();
         let solana_program_id = std::env::var("SOLANA_PROGRAM_ID").ok();
@@ -79,6 +87,7 @@ impl AppConfig {
             database_url,
             redis_url,
             rate_limit_rps,
+            management_api_key,
             solana_rpc_url,
             solana_program_id,
             solana_usdc_mint,

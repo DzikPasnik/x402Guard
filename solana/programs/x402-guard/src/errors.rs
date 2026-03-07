@@ -47,4 +47,8 @@ pub enum GuardError {
     /// Arithmetic overflow detected in spend calculation.
     #[msg("Arithmetic overflow in spend calculation")]
     ArithmeticOverflow,
+
+    /// USDC mint does not match known devnet or mainnet mint address.
+    #[msg("Invalid USDC mint: must be official devnet or mainnet USDC")]
+    InvalidUsdcMint,
 }
