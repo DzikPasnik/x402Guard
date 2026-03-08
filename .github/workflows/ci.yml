@@ -62,6 +62,32 @@ jobs:
       - name: cargo clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
 
+  solana:
+    name: Solana (cargo check)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: solana
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            solana/target
+          key: ${{ runner.os }}-solana-cargo-${{ hashFiles('solana/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-solana-cargo-
+
+      - name: cargo check --lib
+        run: cargo check --lib
+
   dashboard:
     name: Dashboard (next build)
     runs-on: ubuntu-latest
@@ -87,6 +113,45 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-for-ci"
           NEXT_PUBLIC_PROXY_URL: "http://localhost:3402"
+
+  dashboard-e2e:
+    name: Dashboard (E2E tests)
+    runs-on: ubuntu-latest
+    needs: [dashboard]
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: |
+          rm -f package-lock.json
+          npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run E2E tests
+        run: npx playwright test
+        env:
+          DEV_SKIP_AUTH: "true"
+          NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-for-ci"
+          NEXT_PUBLIC_PROXY_URL: "http://localhost:3402"
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: dashboard/test-results/
+          retention-days: 7
 
   examples-ts:
     name: Examples (TypeScript)

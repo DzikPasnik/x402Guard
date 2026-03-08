@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# x402Guard Dashboard
 
-## Getting Started
+Web UI for monitoring agents, managing guardrail rules, and viewing audit logs for the x402Guard proxy.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 16 (App Router)
+- React 19
+- shadcn/ui v3 (Radix UI primitives)
+- Tailwind CSS 4
+- RainbowKit + SIWE (Sign-In with Ethereum)
+- Supabase (Postgres + Row Level Security)
+
+## Prerequisites
+
+- Node.js 22+
+- A Supabase project (URL and anon key)
+- x402Guard proxy running (default: `http://localhost:3001`)
+
+## Setup
 
 ```bash
+npm install
+cp .env.local.example .env.local
+# Edit .env.local with your values (see table below)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | yes | Supabase project URL (e.g. `https://xxxx.supabase.co`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Supabase anon/public key |
+| `PROXY_URL` | yes | x402Guard proxy base URL (server-side only) |
+| `MANAGEMENT_API_KEY` | yes | API key for proxy management endpoints (server-side only) |
+| `DEV_SKIP_AUTH` | no | Set to `true` to bypass wallet auth during local development |
 
-## Learn More
+## Pages
 
-To learn more about Next.js, take a look at the following resources:
+| Route | Description |
+|-------|-------------|
+| `/` | Landing page |
+| `/login` | Wallet connect and SIWE sign-in |
+| `/dashboard` | Agents overview — list, create, deactivate |
+| `/dashboard/agents/[id]` | Agent detail: spend stats, guardrail rules CRUD, session keys |
+| `/dashboard/logs` | Immutable audit log with date range, agent, and event type filters |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server on port 3000 |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+| `npm run test:e2e` | Playwright E2E tests (8 tests covering critical flows) |
 
-## Deploy on Vercel
+## E2E Tests
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The Playwright suite covers:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Landing page navigation to login
+- Login page rendering
+- Dashboard redirect when unauthenticated
+- Agent creation flow
+- Guardrail rule creation
+- Audit log page with filters
+- Spend monitoring display
+- Session key management
+
+```bash
+npm run test:e2e
+```
+
+Test results are written to `test-results/`.
+
+## License
+
+MIT

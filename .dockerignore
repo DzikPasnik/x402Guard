@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+dashboard/node_modules/
+examples/*/node_modules/
+
+# Build artifacts
+target/
+solana/target/
+dashboard/.next/
+dashboard/out/
+
+# Git
+.git/
+.gitignore
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+
+# Planning / Docs (not needed in container)
+.planning/
+.claude/
+.github/
+
+# Test artifacts
+dashboard/test-results/
+dashboard/playwright-report/
+coverage/
+
+# OS files
+Thumbs.db
+.DS_Store
