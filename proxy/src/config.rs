@@ -38,7 +38,9 @@ impl AppConfig {
             .unwrap_or_else(|_| "0.0.0.0".into())
             .parse()?;
 
-        let port: u16 = std::env::var("PROXY_PORT")
+        // Railway injects PORT; fall back to PROXY_PORT, then default 3402.
+        let port: u16 = std::env::var("PORT")
+            .or_else(|_| std::env::var("PROXY_PORT"))
             .unwrap_or_else(|_| "3402".into())
             .parse()?;
 
