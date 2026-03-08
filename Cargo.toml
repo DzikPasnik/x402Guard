@@ -45,7 +45,7 @@ thiserror = "2"
 anyhow = "1"
 
 # Redis
-redis = { version = "0.27", features = ["tokio-comp"] }
+redis = { version = "0.27", features = ["tokio-comp", "tokio-native-tls-comp"] }
 
 # URL parsing
 url = "2"
