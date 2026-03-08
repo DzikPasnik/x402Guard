@@ -13,22 +13,22 @@ export default function Home() {
           Non-custodial x402 safety proxy for autonomous DeFi agents.
         </p>
 
-        <div className="p-8 bg-card border rounded-lg shadow-sm space-y-4">
-          <h2 className="text-2xl font-semibold">Dashboard coming in Phase 4</h2>
+        <div className="p-8 bg-card border rounded-lg shadow-sm space-y-4 max-w-[500px]">
+          <h2 className="text-2xl font-semibold">Protect your AI agents</h2>
           <p className="text-muted-foreground">
-            The full control UI for guardrails, session keys, and agent monitoring is under construction.
+            Configurable spend limits, contract whitelists, session keys, and an immutable audit log — without ever holding your funds.
           </p>
         </div>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row mt-8">
           <Button asChild size="lg">
-            <Link href="http://localhost:3402/api/v1/health" target="_blank" rel="noopener noreferrer">
-              Check Proxy Health
+            <Link href="/login">
+              Launch Dashboard
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href="https://github.com/x402guard/x402guard-dev" target="_blank" rel="noopener noreferrer">
-              View Documentation
+            <Link href="https://github.com/x402guard/x402Guard" target="_blank" rel="noopener noreferrer">
+              View on GitHub
             </Link>
           </Button>
         </div>
