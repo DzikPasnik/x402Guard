@@ -2,8 +2,9 @@ import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 export async function verifySession() {
-  // Dev-only: skip auth for local preview
-  if (process.env.DEV_SKIP_AUTH === 'true') {
+  // Dev-only: skip auth for local preview (SECURITY: guarded by NODE_ENV)
+  const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
+  if (isDev && process.env.DEV_SKIP_AUTH === 'true') {
     return {
       user: {
         id: 'dev-user',

@@ -3,8 +3,9 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Dev-only: skip auth for local preview
-  if (process.env.DEV_SKIP_AUTH === 'true') {
+  // Dev-only: skip auth for local preview (SECURITY: guarded by NODE_ENV)
+  const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
+  if (isDev && process.env.DEV_SKIP_AUTH === 'true') {
     return NextResponse.next()
   }
 

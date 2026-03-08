@@ -10,10 +10,10 @@ dashboard/.next/
 dashboard/out/
 dashboard/.env.local
 
-# Environment
+# Environment (catch ALL .env variants — never commit secrets)
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # IDE
 .vscode/

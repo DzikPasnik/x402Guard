@@ -41,8 +41,9 @@ function apiHeadersNoBody(): Record<string, string> {
  * In dev mode (DEV_SKIP_AUTH=true), ownership is not checked.
  */
 async function assertAgentOwnership(agentId: string): Promise<{ error?: string }> {
-  // Dev mode: skip ownership check (mock user has no real wallet)
-  if (process.env.DEV_SKIP_AUTH === 'true') {
+  // Dev mode: skip ownership check (SECURITY: guarded by NODE_ENV)
+  const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
+  if (isDev && process.env.DEV_SKIP_AUTH === 'true') {
     return {}
   }
 
