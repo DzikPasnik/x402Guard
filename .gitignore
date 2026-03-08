@@ -32,5 +32,12 @@ Thumbs.db
 # Docker
 docker-compose.override.yml
 
+# Test artifacts
+dashboard/test-results/
+dashboard/playwright-report/
+
+# Solana build
+solana/target/
+
 # Logs
 *.log

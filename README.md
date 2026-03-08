@@ -105,11 +105,12 @@ Key variables:
 | Phase | Status | Description |
 |-------|--------|-------------|
 | 0 - Setup | Done | Repo skeleton, CI, Docker Compose |
-| 1 - Core Proxy | Next | x402 verification, rate limiting, replay prevention |
-| 2 - Guardrails + Session Keys | Planned | EIP-7702, spend limits, contract whitelist |
-| 3 - Revoke + Audit + Solana | Planned | Solana PDA vault, immutable audit logs |
-| 4 - Dashboard | Planned | Full control UI |
-| 5 - Integrations | Planned | ElizaOS, Virtuals Protocol, Cod3x |
+| 1 - Core Proxy | Done | x402 verification, rate limiting, replay prevention (19 tests) |
+| 2 - Guardrails + Session Keys | Done | EIP-7702, spend limits, contract whitelist (52 tests) |
+| 3 - Revoke + Audit + Solana | Done | Solana PDA vault, immutable audit logs (102 proxy + 13 Solana tests) |
+| 4 - Dashboard | Done | Agent monitoring, guardrail CRUD, audit log viewer, spend charts |
+| 5 - Integrations | Done | ElizaOS plugin, Virtuals Game plugin, Cod3x adapter |
+| Security Audit | Done | 6 CRITICAL vulnerabilities found and fixed (see [SECURITY.md](SECURITY.md)) |
 
 ## License
 

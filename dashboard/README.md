@@ -15,7 +15,7 @@ Web UI for monitoring agents, managing guardrail rules, and viewing audit logs f
 
 - Node.js 22+
 - A Supabase project (URL and anon key)
-- x402Guard proxy running (default: `http://localhost:3001`)
+- x402Guard proxy running (default: `http://localhost:3402`)
 
 ## Setup
 

@@ -16,7 +16,7 @@ x402Guard is a non-custodial x402 safety proxy for autonomous DeFi agents. This 
 ### Clone and Install
 
 ```bash
-git clone https://github.com/your-org/x402Guard.git
+git clone https://github.com/x402guard/x402Guard.git
 cd x402Guard
 
 # Install dashboard dependencies
