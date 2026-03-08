@@ -1,6 +1,12 @@
 # x402Guard
 
-Non-custodial x402 safety proxy for autonomous DeFi agents.
+[![CI](https://github.com/DzikPasnik/x402Guard/actions/workflows/ci.yml/badge.svg)](https://github.com/DzikPasnik/x402Guard/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Proxy Status](https://img.shields.io/badge/proxy-live-brightgreen)](https://x402guard-production.up.railway.app/api/v1/health)
+
+Non-custodial x402 safety proxy for autonomous DeFi agents on Base and Solana.
+
+> **Live now:** [Dashboard](https://x402-guard-flame.vercel.app) | [Proxy Health](https://x402guard-production.up.railway.app/api/v1/health) | [Security Audit](SECURITY.md)
 
 x402Guard sits between AI agents and Web3 services, intercepting HTTP 402 payment flows
 and enforcing configurable guardrails (spend limits, contract whitelists, session key scoping)
@@ -36,8 +42,8 @@ Agent → x402Guard Proxy (Rust/Axum :3402) → Target Service
 ### 1. Clone and configure
 
 ```bash
-git clone <repo-url>
-cd x402guard
+git clone https://github.com/DzikPasnik/x402Guard.git
+cd x402Guard
 cp .env.example .env
 # Edit .env with your RPC URLs and Supabase credentials
 ```
@@ -111,6 +117,19 @@ Key variables:
 | 4 - Dashboard | Done | Agent monitoring, guardrail CRUD, audit log viewer, spend charts |
 | 5 - Integrations | Done | ElizaOS plugin, Virtuals Game plugin, Cod3x adapter |
 | Security Audit | Done | 6 CRITICAL vulnerabilities found and fixed (see [SECURITY.md](SECURITY.md)) |
+
+## Integration Examples
+
+| Example | Language | Framework | Description |
+|---------|----------|-----------|-------------|
+| [core](examples/core/) | TypeScript | Vanilla SDK | Direct proxy API client |
+| [elizaos](examples/elizaos/) | TypeScript | ElizaOS | AI agent plugin |
+| [virtuals](examples/virtuals/) | Python | GAME SDK | Virtuals Protocol integration |
+| [cod3x](examples/cod3x/) | TypeScript | Cod3x | DeFi adapter |
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding standards, and PR workflow.
 
 ## License
 
