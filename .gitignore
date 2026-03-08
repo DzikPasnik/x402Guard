@@ -2,7 +2,7 @@
 /target/
 proxy/target/
 **/*.rs.bk
-Cargo.lock
+# Cargo.lock is committed for binary crates (needed for reproducible builds)
 
 # Node / Next.js
 node_modules/
