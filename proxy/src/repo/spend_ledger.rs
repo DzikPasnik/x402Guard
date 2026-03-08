@@ -64,30 +64,6 @@ pub async fn record_spend_atomic(
     }
 }
 
-/// Record spend without daily limit check (legacy — prefer `record_spend_atomic`).
-pub async fn record_spend(
-    pool: &PgPool,
-    agent_id: Uuid,
-    session_key_id: Option<Uuid>,
-    amount: u64,
-    tx_nonce: &str,
-) -> Result<()> {
-    let amount_i64 = i64::try_from(amount)
-        .map_err(|_| anyhow::anyhow!("spend amount {} exceeds i64::MAX", amount))?;
-
-    sqlx::query(
-        "INSERT INTO spend_ledger (agent_id, session_key_id, amount, tx_nonce) \
-         VALUES ($1, $2, $3, $4)",
-    )
-    .bind(agent_id)
-    .bind(session_key_id)
-    .bind(amount_i64)
-    .bind(tx_nonce)
-    .execute(pool)
-    .await?;
-    Ok(())
-}
-
 /// Sum all spend for an agent in the last 24 hours (rolling window).
 pub async fn sum_last_24h(pool: &PgPool, agent_id: Uuid) -> Result<u64> {
     let row: (i64,) = sqlx::query_as(

@@ -24,6 +24,6 @@ export default defineConfig({
     env: {
       DEV_SKIP_AUTH: 'true',
     },
-    timeout: 30_000,
+    timeout: 120_000,
   },
 })
