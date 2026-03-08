@@ -7,9 +7,9 @@ test.describe('Landing Page', () => {
     await expect(page.getByText('Non-custodial x402 safety proxy')).toBeVisible()
   })
 
-  test('has proxy health and documentation links', async ({ page }) => {
+  test('has dashboard and github links', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('link', { name: 'Check Proxy Health' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'View Documentation' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Launch Dashboard' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'View on GitHub' })).toBeVisible()
   })
 })
