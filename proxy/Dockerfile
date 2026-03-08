@@ -24,6 +24,7 @@ RUN rm -rf proxy/src
 FROM deps AS builder
 
 COPY proxy/src proxy/src
+COPY proxy/migrations proxy/migrations
 RUN touch proxy/src/main.rs && \
     cargo build --release --package x402-guard-proxy
 
