@@ -31,8 +31,8 @@ pub fn create_router(state: AppState) -> Router {
         .merge(handlers::guardrail_rules::routes())
         .merge(handlers::session_keys::routes())
         .merge(handlers::solana_vault::routes())
-        .layer(axum::Extension(api_key_config))
-        .layer(middleware::from_fn(require_api_key));
+        .layer(middleware::from_fn(require_api_key))
+        .layer(axum::Extension(api_key_config));
 
     let api_routes = Router::new()
         .merge(public_routes)
