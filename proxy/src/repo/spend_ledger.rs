@@ -31,10 +31,12 @@ pub async fn record_spend_atomic(
 
             // Atomic INSERT...SELECT WHERE: only inserts if 24h sum + new amount <= limit.
             // The subquery and INSERT run in the same statement — no TOCTOU window.
+            // NOTE: SUM(BIGINT) returns NUMERIC in PostgreSQL; cast to BIGINT
+            // so the + $3 comparison stays in integer domain.
             let result = sqlx::query(
                 "INSERT INTO spend_ledger (agent_id, session_key_id, amount, tx_nonce) \
                  SELECT $1, $2, $3, $4 \
-                 WHERE (SELECT COALESCE(SUM(amount), 0) FROM spend_ledger \
+                 WHERE (SELECT COALESCE(SUM(amount), 0)::BIGINT FROM spend_ledger \
                         WHERE agent_id = $1 AND created_at > now() - interval '24 hours') + $3 <= $5",
             )
             .bind(agent_id)
@@ -65,9 +67,12 @@ pub async fn record_spend_atomic(
 }
 
 /// Sum all spend for an agent in the last 24 hours (rolling window).
+///
+/// NOTE: PostgreSQL `SUM(BIGINT)` returns `NUMERIC` (to prevent overflow),
+/// so we must cast back to `BIGINT` for sqlx to decode as `i64`.
 pub async fn sum_last_24h(pool: &PgPool, agent_id: Uuid) -> Result<u64> {
     let row: (i64,) = sqlx::query_as(
-        "SELECT COALESCE(SUM(amount), 0) FROM spend_ledger \
+        "SELECT COALESCE(SUM(amount), 0)::BIGINT FROM spend_ledger \
          WHERE agent_id = $1 AND created_at > now() - interval '24 hours'",
     )
     .bind(agent_id)
