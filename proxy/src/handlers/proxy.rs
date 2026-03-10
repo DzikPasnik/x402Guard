@@ -143,7 +143,7 @@ async fn forward_request(
         // Verify agent exists and is active
         let agent = repo::agents::find_by_id(&state.db, aid)
             .await
-            .map_err(AppError::Internal)?
+            .map_err(|e| { tracing::error!(error = %e, agent_id = %aid, "find_by_id failed"); AppError::Internal(e) })?
             .ok_or_else(|| AppError::NotFound(format!("agent {} not found", aid)))?;
 
         // SECURITY [M6]: Reject payments for deactivated agents
@@ -154,12 +154,12 @@ async fn forward_request(
         // Load active rules for this agent
         let rules = repo::guardrails::find_active_by_agent(&state.db, aid)
             .await
-            .map_err(AppError::Internal)?;
+            .map_err(|e| { tracing::error!(error = %e, agent_id = %aid, "find_active_by_agent failed"); AppError::Internal(e) })?;
 
         // Query rolling 24h spend from ledger (for non-daily-limit rules evaluation)
         let daily_spent = repo::spend_ledger::sum_last_24h(&state.db, aid)
             .await
-            .map_err(AppError::Internal)?;
+            .map_err(|e| { tracing::error!(error = %e, agent_id = %aid, "sum_last_24h failed"); AppError::Internal(e) })?;
 
         // Evaluate all rules (fail-closed)
         if let Err(violation) = guardrails::evaluate(&rules, &verified, &requirements, daily_spent) {
@@ -231,7 +231,7 @@ async fn forward_request(
             daily_limit,
         )
         .await
-        .map_err(AppError::Internal)?;
+        .map_err(|e| { tracing::error!(error = %e, agent_id = %aid, amount = payment_amount, "record_spend_atomic failed"); AppError::Internal(e) })?;
 
         if !spend_ok {
             return Err(AppError::GuardrailViolation(
