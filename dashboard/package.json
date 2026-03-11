@@ -17,6 +17,8 @@
     "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-table": "^8.21.3",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

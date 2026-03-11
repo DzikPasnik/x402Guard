@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SiweMessage } from 'siwe'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createHmac } from 'crypto'
+import { checkAuthRateLimit } from '@/lib/rate-limit'
 
 const ALLOWED_CHAIN_IDS = [8453, 84532] // Base Mainnet, Base Sepolia
 
@@ -19,6 +20,10 @@ function getSupabaseAdmin(): SupabaseClient {
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 5 requests per 60s per IP
+    const blocked = await checkAuthRateLimit(req, 'verify')
+    if (blocked) return blocked
+
     // CSRF: verify request originates from our own domain
     const origin = req.headers.get('origin')
     const host = req.headers.get('host')

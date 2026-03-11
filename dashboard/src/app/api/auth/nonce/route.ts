@@ -1,7 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { generateNonce } from 'siwe'
+import { checkAuthRateLimit } from '@/lib/rate-limit'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const blocked = await checkAuthRateLimit(req, 'nonce')
+  if (blocked) return blocked
+
   const nonce = generateNonce()
 
   const response = NextResponse.json({ nonce })
