@@ -57,6 +57,9 @@ Read these at session start. Update after every PR or correction.
 - Write tool requires reading file first if it already exists.
 - GSD plan naming: `XX-YY-PLAN.md` format expected by GSD tools.
 - Docker pipe may not be ready immediately after Docker Desktop starts — retry once.
+- **PostgreSQL SUM(BIGINT) → NUMERIC**: Always cast: `COALESCE(SUM(col), 0)::BIGINT`. sqlx expects i64 but gets NUMERIC without cast.
+- **Railway build queue stalls**: If "Waiting for build" >5 min, check Build Logs (may be building). If stuck, remove deploy + push new commit.
+- **AppError::Internal swallows errors**: Every `.map_err(AppError::Internal)?` MUST be preceded by `tracing::error!` for debuggability.
 
 ## Key Paths
 - Proxy: `proxy/src/` (handlers, middleware, models, services)

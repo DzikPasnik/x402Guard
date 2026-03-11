@@ -41,3 +41,4 @@ solana/target/
 
 # Logs
 *.log
+.vercel
