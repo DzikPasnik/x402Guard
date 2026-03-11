@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SiweMessage } from 'siwe'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createHmac } from 'crypto'
 
 const ALLOWED_CHAIN_IDS = [8453, 84532] // Base Mainnet, Base Sepolia
 
@@ -52,7 +53,11 @@ export async function POST(req: NextRequest) {
     // 4. Create or retrieve Supabase user
     const walletAddress = result.data.address.toLowerCase()
     const pseudoEmail = `${walletAddress}@wallet.x402guard.local`
-    const deterministicPassword = `${process.env.SUPABASE_WALLET_SECRET}:${walletAddress}`
+    // HMAC-SHA256 produces a 64-char hex string (under bcrypt's 72-byte limit).
+    // The raw concatenation was 107 chars which caused Supabase 500 errors.
+    const deterministicPassword = createHmac('sha256', process.env.SUPABASE_WALLET_SECRET!)
+      .update(walletAddress)
+      .digest('hex')
 
     // Try sign-in first
     const { data: signInData, error: signInError } =
