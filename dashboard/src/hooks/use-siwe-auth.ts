@@ -4,7 +4,6 @@ import { useSignMessage, useAccount, useSwitchChain } from 'wagmi'
 import { SiweMessage } from 'siwe'
 import { supabase } from '@/lib/supabase'
 import { useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 
 const ALLOWED_CHAIN_IDS = [8453, 84532] // Base Mainnet, Base Sepolia
 
@@ -12,7 +11,6 @@ export function useSiweAuth() {
   const { address, chainId: walletChainId } = useAccount()
   const { signMessageAsync } = useSignMessage()
   const { switchChainAsync } = useSwitchChain()
-  const router = useRouter()
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -92,22 +90,26 @@ export function useSiweAuth() {
       const { session } = await verifyRes.json()
 
       // Step 5: Set Supabase session in browser client
-      if (session) {
-        await supabase.auth.setSession({
-          access_token: session.access_token,
-          refresh_token: session.refresh_token,
-        })
+      if (!session?.access_token || !session?.refresh_token) {
+        throw new Error('Server returned empty session. Please try again.')
       }
 
+      await supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      })
+
       // Step 6: Redirect to dashboard
-      router.push('/dashboard')
+      // Use window.location for full page navigation so middleware sees the new cookies.
+      // router.push() does client-side navigation which can race with cookie writes.
+      window.location.href = '/dashboard'
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Sign-in failed'
       setError(msg)
     } finally {
       setIsSigningIn(false)
     }
-  }, [address, walletChainId, signMessageAsync, switchChainAsync, router])
+  }, [address, walletChainId, signMessageAsync, switchChainAsync])
 
   return { signIn, isSigningIn, error }
 }
