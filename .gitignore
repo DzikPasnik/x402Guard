@@ -21,9 +21,12 @@ dashboard/.env.local
 *.swp
 *.swo
 
-# Claude Code
+# Claude Code / AI Skills
 .claude/
 .agents/
+.agent/
+.kiro/
+skills-lock.json
 
 # OS
 .DS_Store

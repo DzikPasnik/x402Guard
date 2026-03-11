@@ -13,6 +13,7 @@ export function useSiweAuth() {
   const { switchChainAsync } = useSwitchChain()
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [status, setStatus] = useState<string | null>(null)
 
   const signIn = useCallback(async () => {
     if (!address) {
@@ -22,6 +23,7 @@ export function useSiweAuth() {
 
     setIsSigningIn(true)
     setError(null)
+    setStatus(null)
 
     try {
       // Step 0: Ensure we're on an allowed chain (Base or Base Sepolia)
@@ -29,7 +31,7 @@ export function useSiweAuth() {
       // the wagmi config default, not the wallet's actual chain.
       let activeChainId = walletChainId ?? 0
       if (!ALLOWED_CHAIN_IDS.includes(activeChainId)) {
-        setError('Switching to Base Sepolia...')
+        setStatus('Switching to Base Sepolia...')
         try {
           await switchChainAsync({ chainId: 84532 }) // Switch to Base Sepolia
           activeChainId = 84532
@@ -40,7 +42,7 @@ export function useSiweAuth() {
       }
 
       // Step 1: Fetch nonce from server
-      setError(null)
+      setStatus(null)
       const nonceRes = await fetch('/api/auth/nonce')
       if (!nonceRes.ok) {
         throw new Error(`Failed to fetch nonce (${nonceRes.status})`)
@@ -60,7 +62,7 @@ export function useSiweAuth() {
       const preparedMessage = message.prepareMessage()
 
       // Step 3: Sign with wallet (this opens the wallet popup)
-      setError('Check your wallet to sign the message...')
+      setStatus('Check your wallet to sign the message...')
       let signature: string
       try {
         signature = await signMessageAsync({ message: preparedMessage })
@@ -75,7 +77,7 @@ export function useSiweAuth() {
       }
 
       // Step 4: Verify on server
-      setError(null)
+      setStatus('Verifying signature...')
       const verifyRes = await fetch('/api/auth/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -108,8 +110,9 @@ export function useSiweAuth() {
       setError(msg)
     } finally {
       setIsSigningIn(false)
+      setStatus(null)
     }
   }, [address, walletChainId, signMessageAsync, switchChainAsync])
 
-  return { signIn, isSigningIn, error }
+  return { signIn, isSigningIn, error, status }
 }

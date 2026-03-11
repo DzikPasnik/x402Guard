@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react'
 
 export function WalletAuthButton() {
   const { isConnected } = useAccount()
-  const { signIn, isSigningIn, error } = useSiweAuth()
+  const { signIn, isSigningIn, error, status } = useSiweAuth()
   const [mounted, setMounted] = useState(false)
 
   // Prevent hydration mismatch — wallet state is undefined on server
@@ -34,6 +34,11 @@ export function WalletAuthButton() {
         >
           {isSigningIn ? 'Signing in...' : 'Sign In with Ethereum'}
         </Button>
+      )}
+      {status && (
+        <div className="rounded-md border border-blue-500/50 bg-blue-500/10 px-4 py-2 max-w-xs">
+          <p className="text-sm font-medium text-blue-600 dark:text-blue-400 text-center">{status}</p>
+        </div>
       )}
       {error && (
         <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-2 max-w-xs">

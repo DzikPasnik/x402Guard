@@ -19,6 +19,25 @@ function getSupabaseAdmin(): SupabaseClient {
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF: verify request originates from our own domain
+    const origin = req.headers.get('origin')
+    const host = req.headers.get('host')
+    if (origin && host && !origin.includes(host)) {
+      return NextResponse.json(
+        { error: 'Invalid origin' },
+        { status: 403 },
+      )
+    }
+
+    // Validate SUPABASE_WALLET_SECRET is configured
+    if (!process.env.SUPABASE_WALLET_SECRET) {
+      console.error('SIWE verify: SUPABASE_WALLET_SECRET not configured')
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 },
+      )
+    }
+
     const { message, signature } = await req.json()
 
     // 1. Read nonce from httpOnly cookie
@@ -78,6 +97,7 @@ export async function POST(req: NextRequest) {
           })
 
         if (createError) {
+          console.error('SIWE: failed to create user', { wallet: walletAddress, error: createError.message })
           return NextResponse.json(
             { error: 'Failed to create user account' },
             { status: 500 },
@@ -92,6 +112,7 @@ export async function POST(req: NextRequest) {
           })
 
         if (newSignInError || !newSignIn.session) {
+          console.error('SIWE: failed to sign in new user', { wallet: walletAddress, error: newSignInError?.message })
           return NextResponse.json(
             { error: 'Failed to create session' },
             { status: 500 },
@@ -105,6 +126,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Unexpected sign-in error
+      console.error('SIWE: unexpected sign-in error', { wallet: walletAddress, error: signInError.message })
       return NextResponse.json(
         { error: 'Authentication failed' },
         { status: 500 },
@@ -122,7 +144,8 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json({ session: signInData.session })
     response.cookies.set('siwe-nonce', '', { maxAge: 0, path: '/' })
     return response
-  } catch {
+  } catch (err) {
+    console.error('SIWE: verification error', { error: err instanceof Error ? err.message : String(err) })
     return NextResponse.json(
       { error: 'Verification failed' },
       { status: 401 },

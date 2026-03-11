@@ -93,8 +93,8 @@ Per-agent rate limits are implemented but the default thresholds have not been v
 **DNS rebinding protection not implemented.**
 The proxy does not validate the `Host` header. A DNS rebinding attack could allow a compromised browser context to make requests to the proxy as if it were a local service. Mitigation: deploy behind a reverse proxy that enforces an allowlist of valid `Host` values.
 
-**SIWE authentication flow not fully tested with real wallets.**
-The Sign-In with Ethereum flow for the dashboard has been implemented but has known issues with chain switching and has not been validated against a broad set of wallet clients. The `DEV_SKIP_AUTH=true` environment variable is available for development but must never be set in production.
+**SIWE authentication flow partially tested.**
+The Sign-In with Ethereum flow uses `@supabase/ssr` for cookie-based session persistence and has been fixed for chain switching issues. CSRF origin validation and error logging have been added to `/api/auth/verify`. The `DEV_SKIP_AUTH=true` environment variable is available for development but must never be set in production. Rate limiting on the `/api/auth/verify` endpoint is not yet implemented.
 
 ---
 
