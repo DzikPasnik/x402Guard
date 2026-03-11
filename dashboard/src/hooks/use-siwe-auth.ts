@@ -1,6 +1,6 @@
 'use client'
 
-import { useSignMessage, useAccount, useChainId, useSwitchChain } from 'wagmi'
+import { useSignMessage, useAccount, useSwitchChain } from 'wagmi'
 import { SiweMessage } from 'siwe'
 import { supabase } from '@/lib/supabase'
 import { useState, useCallback } from 'react'
@@ -9,8 +9,7 @@ import { useRouter } from 'next/navigation'
 const ALLOWED_CHAIN_IDS = [8453, 84532] // Base Mainnet, Base Sepolia
 
 export function useSiweAuth() {
-  const { address } = useAccount()
-  const chainId = useChainId()
+  const { address, chainId: walletChainId } = useAccount()
   const { signMessageAsync } = useSignMessage()
   const { switchChainAsync } = useSwitchChain()
   const router = useRouter()
@@ -28,7 +27,9 @@ export function useSiweAuth() {
 
     try {
       // Step 0: Ensure we're on an allowed chain (Base or Base Sepolia)
-      let activeChainId = chainId
+      // Use walletChainId from useAccount() — NOT useChainId() which returns
+      // the wagmi config default, not the wallet's actual chain.
+      let activeChainId = walletChainId ?? 0
       if (!ALLOWED_CHAIN_IDS.includes(activeChainId)) {
         setError('Switching to Base Sepolia...')
         try {
@@ -106,7 +107,7 @@ export function useSiweAuth() {
     } finally {
       setIsSigningIn(false)
     }
-  }, [address, chainId, signMessageAsync, switchChainAsync, router])
+  }, [address, walletChainId, signMessageAsync, switchChainAsync, router])
 
   return { signIn, isSigningIn, error }
 }
