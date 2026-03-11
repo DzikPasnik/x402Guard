@@ -81,7 +81,7 @@ export async function getAgentsByOwner(ownerAddress: string): Promise<Agent[]> {
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase
     .from('agents')
-    .select('id, name, owner_address, is_active, created_at, updated_at')
+    .select('id, name, owner_address, is_active, created_at')
     .ilike('owner_address', ownerAddress)
     .order('created_at', { ascending: false })
 

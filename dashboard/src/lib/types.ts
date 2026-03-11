@@ -6,7 +6,7 @@ export interface Agent {
   owner_address: string
   is_active: boolean
   created_at: string
-  updated_at: string
+  updated_at?: string
 }
 
 export type RuleType =
@@ -23,7 +23,7 @@ export interface GuardrailRule {
   rule_params: Record<string, unknown>
   is_active: boolean
   created_at: string
-  updated_at: string
+  updated_at?: string
 }
 
 export interface SessionKey {
@@ -36,7 +36,7 @@ export interface SessionKey {
   expires_at: string
   is_revoked: boolean
   created_at: string
-  updated_at: string
+  updated_at?: string
 }
 
 export type AuditEventType =
