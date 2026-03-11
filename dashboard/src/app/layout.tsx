@@ -14,8 +14,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "x402Guard Dashboard",
-  description: "Non-custodial x402 safety proxy for autonomous DeFi agents.",
+  title: "x402Guard — Guardrails for Autonomous DeFi Agents",
+  description:
+    "Non-custodial x402 safety proxy that enforces spend limits, contract whitelists, and session keys on every payment your AI agent makes. Open source. Base + Solana.",
+  openGraph: {
+    title: "x402Guard — Guardrails for Autonomous DeFi Agents",
+    description:
+      "Non-custodial safety proxy for AI agents. Spend limits, contract whitelists, session keys, immutable audit log.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "x402Guard — Guardrails for Autonomous DeFi Agents",
+    description:
+      "Non-custodial safety proxy for AI agents. Spend limits, contract whitelists, session keys, immutable audit log.",
+  },
 };
 
 export default function RootLayout({
