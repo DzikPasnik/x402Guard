@@ -9,7 +9,7 @@
  * - Query audit logs
  */
 
-import { streamText, type ToolSet } from "ai";
+import { streamText, convertToModelMessages, type ToolSet } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
@@ -321,10 +321,13 @@ export async function POST(req: Request) {
 
   const { messages } = await req.json();
 
+  // Convert UIMessages (from DefaultChatTransport) to ModelMessages (for streamText)
+  const modelMessages = await convertToModelMessages(messages);
+
   const result = streamText({
     model: anthropic("claude-sonnet-4-20250514"),
     system: SYSTEM_PROMPT,
-    messages,
+    messages: modelMessages,
     tools: agentTools,
     maxSteps: 8,
   } as Parameters<typeof streamText>[0]);
