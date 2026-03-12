@@ -45,3 +45,4 @@ solana/target/
 # Logs
 *.log
 .vercel
+CLAUDE.md
