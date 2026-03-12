@@ -2,14 +2,14 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, memo, useCallback } from "react";
 import type { UIMessage } from "ai";
 
 // ---------------------------------------------------------------------------
-// Message bubble
+// Message bubble (memoized — avoids re-render during streaming)
 // ---------------------------------------------------------------------------
 
-function MessageBubble({
+const MessageBubble = memo(function MessageBubble({
   role,
   content,
 }: {
@@ -31,10 +31,10 @@ function MessageBubble({
       </div>
     </div>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
-// Tool call indicator
+// Tool call indicator (memoized)
 // ---------------------------------------------------------------------------
 
 const TOOL_LABELS: Record<string, { icon: string; loading: string; done: string }> = {
@@ -47,7 +47,7 @@ const TOOL_LABELS: Record<string, { icon: string; loading: string; done: string 
   get_audit_log: { icon: "📜", loading: "Querying audit log...", done: "Audit log loaded" },
 };
 
-function ToolCallIndicator({
+const ToolCallIndicator = memo(function ToolCallIndicator({
   name,
   state,
 }: {
@@ -77,7 +77,7 @@ function ToolCallIndicator({
       </div>
     </div>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Suggested prompts
@@ -107,6 +107,52 @@ const SUGGESTIONS = [
 ];
 
 // ---------------------------------------------------------------------------
+// Pure helper — extract text from UIMessage parts (no component deps)
+// ---------------------------------------------------------------------------
+
+function getMessageText(msg: UIMessage): string {
+  return (msg.parts ?? [])
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("")
+    .trim();
+}
+
+// ---------------------------------------------------------------------------
+// Error banner
+// ---------------------------------------------------------------------------
+
+const ErrorBanner = memo(function ErrorBanner({
+  error,
+  onRetry,
+}: {
+  error: Error;
+  onRetry: () => void;
+}) {
+  const is429 = error.message.includes("429") || error.message.includes("Too many");
+  return (
+    <div className="flex justify-start mb-4">
+      <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm bg-red-500/10 border border-red-500/20 text-red-400">
+        <p className="font-medium mb-1">
+          {is429 ? "Rate limit reached" : "Something went wrong"}
+        </p>
+        <p className="text-red-400/70 text-xs mb-2">
+          {is429
+            ? "Too many requests. Please wait a moment and try again."
+            : error.message}
+        </p>
+        <button
+          onClick={onRetry}
+          className="text-xs bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg px-3 py-1 transition-colors"
+        >
+          Try again
+        </button>
+      </div>
+    </div>
+  );
+});
+
+// ---------------------------------------------------------------------------
 // Main page
 // ---------------------------------------------------------------------------
 
@@ -116,18 +162,26 @@ export default function AgentPage() {
     [],
   );
 
-  const { messages, sendMessage, status } = useChat({ transport });
+  const { messages, sendMessage, status, error } = useChat({ transport });
 
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isLoading = status === "streaming" || status === "submitted";
 
-  // Auto-scroll to bottom
+  // Debounced auto-scroll — avoids thrashing during streaming
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+    return () => {
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
   }, [messages]);
 
   // Focus input on load
@@ -135,27 +189,33 @@ export default function AgentPage() {
     inputRef.current?.focus();
   }, []);
 
-  const handleSend = (text: string) => {
-    if (!text.trim() || isLoading) return;
-    setHasStarted(true);
-    sendMessage({ text });
-    setInput("");
-  };
+  const handleSend = useCallback(
+    (text: string) => {
+      if (!text.trim() || isLoading) return;
+      setHasStarted(true);
+      sendMessage({ text });
+      setInput("");
+    },
+    [isLoading, sendMessage],
+  );
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleSend(input);
-  };
+  const onSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      handleSend(input);
+    },
+    [handleSend, input],
+  );
 
-  /** Extract plain text from a UIMessage's parts array. */
-  const getMessageText = (msg: UIMessage): string =>
-    (msg.parts ?? [])
-      .filter((p): p is { type: "text"; text: string } => p.type === "text")
-      .map((p) => p.text)
-      .join("")
-      .trim();
+  const handleRetry = useCallback(() => {
+    // Re-send the last user message
+    const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
+    if (lastUserMsg) {
+      sendMessage({ text: getMessageText(lastUserMsg) });
+    }
+  }, [messages, sendMessage]);
 
-  const renderMessage = (msg: UIMessage) => {
+  const renderMessage = useCallback((msg: UIMessage) => {
     if (msg.role === "user") {
       return (
         <MessageBubble
@@ -167,7 +227,6 @@ export default function AgentPage() {
     }
 
     if (msg.role === "assistant") {
-      // Render parts in order to preserve the streaming feel
       return (
         <div key={msg.id}>
           {(msg.parts ?? []).map((part, i) => {
@@ -203,7 +262,7 @@ export default function AgentPage() {
     }
 
     return null;
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#09090b] flex flex-col">
@@ -268,6 +327,10 @@ export default function AgentPage() {
           )}
 
           {messages.map(renderMessage)}
+
+          {error && (
+            <ErrorBanner error={error} onRetry={handleRetry} />
+          )}
 
           {isLoading && (
             <div className="flex justify-start mb-4">
