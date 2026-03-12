@@ -47,17 +47,12 @@ export default function Home() {
               <Github className="h-4 w-4" />
               GitHub
             </Link>
-            <StarBorder
-              as="div"
-              className="cursor-pointer text-sm"
-              color="#8b5cf6"
-              speed="6s"
-              thickness={1}
+            <Link
+              href="/login"
+              className="inline-flex items-center rounded-md border border-white/20 bg-white/5 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10 transition-colors"
             >
-              <Link href="/login" className="px-3 py-1">
-                Launch Dashboard
-              </Link>
-            </StarBorder>
+              Launch Dashboard
+            </Link>
           </nav>
         </div>
       </header>
