@@ -37,22 +37,43 @@ function MessageBubble({
 // Tool call indicator
 // ---------------------------------------------------------------------------
 
-function ToolCallIndicator({ name }: { name: string }) {
-  const toolLabels: Record<string, string> = {
-    check_proxy_health: "🔍 Checking proxy health...",
-    list_agents: "📋 Listing agents...",
-    get_guardrail_rules: "🛡️ Loading guardrail rules...",
-    get_session_keys: "🔑 Loading session keys...",
-    get_spend_summary: "💰 Calculating spend...",
-    simulate_payment: "💳 Simulating payment...",
-    get_audit_log: "📜 Querying audit log...",
-  };
+const TOOL_LABELS: Record<string, { icon: string; loading: string; done: string }> = {
+  check_proxy_health: { icon: "🔍", loading: "Checking proxy health...", done: "Proxy health checked" },
+  list_agents: { icon: "📋", loading: "Listing agents...", done: "Agents loaded" },
+  get_guardrail_rules: { icon: "🛡️", loading: "Loading guardrail rules...", done: "Guardrail rules loaded" },
+  get_session_keys: { icon: "🔑", loading: "Loading session keys...", done: "Session keys loaded" },
+  get_spend_summary: { icon: "💰", loading: "Calculating spend...", done: "Spend calculated" },
+  simulate_payment: { icon: "💳", loading: "Simulating payment...", done: "Payment simulated" },
+  get_audit_log: { icon: "📜", loading: "Querying audit log...", done: "Audit log loaded" },
+};
+
+function ToolCallIndicator({
+  name,
+  state,
+}: {
+  name: string;
+  state: string;
+}) {
+  const label = TOOL_LABELS[name];
+  const isDone = state === "output-available" || state === "output-error" || state === "output-denied";
 
   return (
     <div className="flex justify-start mb-2">
-      <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/50 flex items-center gap-2">
-        <span className="animate-spin inline-block w-3 h-3 border border-white/30 border-t-white rounded-full" />
-        {toolLabels[name] ?? `⚙️ Running ${name}...`}
+      <div
+        className={`border rounded-xl px-3 py-2 text-xs flex items-center gap-2 transition-all ${
+          isDone
+            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400/80"
+            : "bg-white/5 border-white/10 text-white/50"
+        }`}
+      >
+        {isDone ? (
+          <span className="text-emerald-400">✓</span>
+        ) : (
+          <span className="animate-spin inline-block w-3 h-3 border border-white/30 border-t-white rounded-full" />
+        )}
+        {label
+          ? `${label.icon} ${isDone ? label.done : label.loading}`
+          : `⚙️ ${isDone ? `${name} done` : `Running ${name}...`}`}
       </div>
     </div>
   );
@@ -146,34 +167,37 @@ export default function AgentPage() {
     }
 
     if (msg.role === "assistant") {
-      const toolParts = (msg.parts ?? []).filter(
-        (p) => p.type.startsWith("tool-"),
-      );
-      const textParts = (msg.parts ?? []).filter(
-        (p): p is { type: "text"; text: string } => p.type === "text",
-      );
-
+      // Render parts in order to preserve the streaming feel
       return (
         <div key={msg.id}>
-          {toolParts.map((part, i) => {
-            // AI SDK v6: tool parts have type like "tool-xxx" and toolName directly
-            const toolName =
-              "toolName" in part
-                ? (part as { toolName: string }).toolName
-                : part.type.replace("tool-", "");
-            return (
-              <ToolCallIndicator key={`tool-${i}`} name={toolName} />
-            );
+          {(msg.parts ?? []).map((part, i) => {
+            if (part.type === "text" && part.text.trim()) {
+              return (
+                <MessageBubble
+                  key={`text-${i}`}
+                  role="assistant"
+                  content={part.text}
+                />
+              );
+            }
+
+            // AI SDK v6: tool parts have type "tool-${toolName}" with state directly on part
+            if (part.type.startsWith("tool-") || part.type === "dynamic-tool") {
+              const toolName = part.type === "dynamic-tool"
+                ? ((part as unknown as { toolName?: string }).toolName ?? "unknown")
+                : part.type.slice(5); // remove "tool-" prefix
+              const state = (part as unknown as { state: string }).state ?? "input-available";
+              return (
+                <ToolCallIndicator
+                  key={`tool-${i}`}
+                  name={toolName}
+                  state={state}
+                />
+              );
+            }
+
+            return null;
           })}
-          {textParts.map((part, i) =>
-            part.text.trim() ? (
-              <MessageBubble
-                key={`text-${i}`}
-                role="assistant"
-                content={part.text}
-              />
-            ) : null,
-          )}
         </div>
       );
     }
@@ -245,10 +269,10 @@ export default function AgentPage() {
 
           {messages.map(renderMessage)}
 
-          {isLoading &&
-            messages[messages.length - 1]?.role !== "assistant" && (
-              <div className="flex justify-start mb-4">
-                <div className="bg-white/10 border border-white/10 rounded-2xl rounded-bl-md px-4 py-3">
+          {isLoading && (
+            <div className="flex justify-start mb-4">
+              <div className="bg-white/10 border border-white/10 rounded-2xl rounded-bl-md px-4 py-3">
+                <div className="flex items-center gap-2">
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-white/40 rounded-full animate-bounce" />
                     <span
@@ -260,9 +284,11 @@ export default function AgentPage() {
                       style={{ animationDelay: "0.3s" }}
                     />
                   </div>
+                  <span className="text-white/30 text-xs">Agent is thinking...</span>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
           <div ref={messagesEndRef} />
         </div>
