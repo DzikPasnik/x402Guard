@@ -46,3 +46,11 @@ solana/target/
 *.log
 .vercel
 CLAUDE.md
+
+# Internal docs (not for public)
+tasks/
+beta-test/
+demo/
+SECURITY_FINDINGS_VISUAL.txt
+.planning/security-audit/
+.planning/promotion/x402-foundation-application.md
