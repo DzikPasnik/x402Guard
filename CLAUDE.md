@@ -60,6 +60,7 @@ Read these at session start. Update after every PR or correction.
 - **PostgreSQL SUM(BIGINT) → NUMERIC**: Always cast: `COALESCE(SUM(col), 0)::BIGINT`. sqlx expects i64 but gets NUMERIC without cast.
 - **Railway build queue stalls**: If "Waiting for build" >5 min, check Build Logs (may be building). If stuck, remove deploy + push new commit.
 - **AppError::Internal swallows errors**: Every `.map_err(AppError::Internal)?` MUST be preceded by `tracing::error!` for debuggability.
+- **E2E tests break on UI changes**: When modifying dashboard layout/header, ALWAYS check `e2e/dashboard.spec.ts` for hardcoded text selectors (e.g., `getByText('x402Guard')`) and update them.
 
 ## Key Paths
 - Proxy: `proxy/src/` (handlers, middleware, models, services)
