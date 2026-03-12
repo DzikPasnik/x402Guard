@@ -15,7 +15,6 @@
 
 [Live Dashboard](https://x402-guard-flame.vercel.app) ·
 [Agent Demo](https://x402-guard-flame.vercel.app/agent) ·
-[Proxy Health](https://x402guard-production.up.railway.app/api/v1/health) ·
 [Security Policy](SECURITY.md) ·
 [Contributing](CONTRIBUTING.md)
 
@@ -68,7 +67,7 @@ AI agents are getting wallets. Coinbase's [x402 protocol](https://www.x402.org/)
 |---|---|
 | **[Agent Demo](https://x402-guard-flame.vercel.app/agent)** | Chat with an AI agent that uses x402Guard tools live — check guardrails, simulate payments, query audit logs |
 | **[Dashboard](https://x402-guard-flame.vercel.app)** | Monitor agents, configure guardrail rules, view spend analytics |
-| **[Proxy API](https://x402guard-production.up.railway.app/api/v1/health)** | Production proxy running on Base Sepolia |
+| **Proxy API** | Production at `x402guard-production.up.railway.app` — [check health](https://x402guard-production.up.railway.app/api/v1/health) (returns JSON) |
 
 ## Quick Start
 
