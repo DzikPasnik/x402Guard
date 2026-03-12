@@ -447,7 +447,7 @@ export async function POST(req: Request) {
   const modelMessages = await convertToModelMessages(parsed.data.messages as any);
 
   const result = streamText({
-    model: anthropic("claude-haiku-3-5-20241022"),
+    model: anthropic("claude-3-5-haiku-20241022"),
     system: SYSTEM_PROMPT,
     messages: modelMessages,
     tools: agentTools,
