@@ -5,8 +5,8 @@ import { test, expect } from '@playwright/test'
 test.describe('Dashboard (dev mode)', () => {
   test('renders dashboard layout with sidebar and heading', async ({ page }) => {
     await page.goto('/dashboard')
-    // Header shows app name
-    await expect(page.locator('header').getByText('x402Guard')).toBeVisible()
+    // Header shows profile dropdown trigger
+    await expect(page.locator('header').getByRole('button', { name: /profile/i })).toBeVisible()
     // Agents heading from the dashboard page
     await expect(page.getByRole('heading', { name: 'Agents' })).toBeVisible()
   })
