@@ -43,6 +43,7 @@ Open http://localhost:3000.
 | Route | Description |
 |-------|-------------|
 | `/` | Landing page |
+| `/agent` | AI agent demo — interactive chat with live x402Guard tools |
 | `/login` | Wallet connect and SIWE sign-in |
 | `/dashboard` | Agents overview — list, create, deactivate |
 | `/dashboard/agents/[id]` | Agent detail: spend stats, guardrail rules CRUD, session keys |

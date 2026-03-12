@@ -6,7 +6,7 @@
 
 Non-custodial x402 safety proxy for autonomous DeFi agents on Base and Solana.
 
-> **Live now:** [Dashboard](https://x402-guard-flame.vercel.app) | [Proxy Health](https://x402guard-production.up.railway.app/api/v1/health) | [Security Audit](SECURITY.md)
+> **Live now:** [Dashboard](https://x402-guard-flame.vercel.app) | [Agent Demo](https://x402-guard-flame.vercel.app/agent) | [Proxy Health](https://x402guard-production.up.railway.app/api/v1/health) | [Security Audit](SECURITY.md)
 
 x402Guard sits between AI agents and Web3 services, intercepting HTTP 402 payment flows
 and enforcing configurable guardrails (spend limits, contract whitelists, session key scoping)
