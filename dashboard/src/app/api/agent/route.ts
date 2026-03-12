@@ -9,7 +9,7 @@
  * - Query audit logs
  */
 
-import { streamText, convertToModelMessages, type ToolSet } from "ai";
+import { streamText, convertToModelMessages, stepCountIs, type ToolSet } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
@@ -329,7 +329,7 @@ export async function POST(req: Request) {
     system: SYSTEM_PROMPT,
     messages: modelMessages,
     tools: agentTools,
-    maxSteps: 8,
+    stopWhen: stepCountIs(8),
   } as Parameters<typeof streamText>[0]);
 
   return result.toUIMessageStreamResponse();
