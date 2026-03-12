@@ -15,6 +15,7 @@ services:
       UPSTASH_REDIS_URL: "redis://redis:6379"
       BASE_SEPOLIA_RPC_URL: "https://sepolia.base.org"
       BASE_MAINNET_RPC_URL: "https://mainnet.base.org"
+      MANAGEMENT_API_KEY: "dev-api-key-change-me"
     depends_on:
       postgres:
         condition: service_healthy
@@ -32,6 +33,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s

@@ -71,23 +71,33 @@ AI agents are getting wallets. Coinbase's [x402 protocol](https://www.x402.org/)
 
 ## Quick Start
 
+**Option A: Try the live deployment (no setup)**
+
+Everything is already running on testnet — just visit the [Agent Demo](https://x402-guard-flame.vercel.app/agent) or [Dashboard](https://x402-guard-flame.vercel.app).
+
+**Option B: Run locally with Docker**
+
 ```bash
-# Clone and configure
 git clone https://github.com/DzikPasnik/x402Guard.git
 cd x402Guard
-cp .env.example .env    # Edit with your RPC URLs and Supabase credentials
 
-# Start everything
-docker compose up       # Proxy :3402 + Postgres :5432 + Redis :6379
+# Start proxy + Postgres (with schema + seed data) + Redis
+docker compose up
 
-# Verify
+# Verify proxy is running
 curl http://localhost:3402/api/v1/health
-# → {"status":"ok"}
+# → {"status":"ok","version":"0.1.0","service":"x402guard-proxy","redis":"connected"}
 
-# Dashboard (separate terminal)
+# Management API key for local dev: dev-api-key-change-me
+curl -H "X-Api-Key: dev-api-key-change-me" http://localhost:3402/api/v1/agents
+# → returns the seeded demo-agent
+
+# Dashboard (optional, separate terminal)
 cd dashboard && npm install && npm run dev
 # → http://localhost:3000
 ```
+
+> Database tables and a demo agent are created automatically on first start. No manual migration needed.
 
 ## Tech Stack
 
