@@ -39,7 +39,7 @@ export default function Home() {
           </div>
           <nav className="flex items-center gap-4">
             <Link
-              href="https://github.com/x402guard/x402Guard"
+              href="https://github.com/DzikPasnik/x402Guard"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-white/50 hover:text-white flex items-center gap-1.5"
@@ -134,7 +134,7 @@ export default function Home() {
                 speed="6s"
               >
                 <Link
-                  href="https://github.com/x402guard/x402Guard"
+                  href="https://github.com/DzikPasnik/x402Guard"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm px-3 py-0.5"
