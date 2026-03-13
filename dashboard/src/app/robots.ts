@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/dashboard/", "/api/", "/login"],
       },
     ],
-    sitemap: "https://x402-guard-flame.vercel.app/sitemap.xml",
+    sitemap: "https://x402guard.dev/sitemap.xml",
   }
 }
