@@ -20,6 +20,7 @@
 **[x402guard.dev](https://x402guard.dev)** ·
 **[Agent Demo](https://x402guard.dev/agent)** ·
 **[API Health](https://x402guard-production.up.railway.app/api/v1/health)** ·
+**[Docs](https://x402guard.dev/docs)** ·
 **[FAQ](https://x402guard.dev/faq)** ·
 **[Security Policy](SECURITY.md)** ·
 **[Contributing](CONTRIBUTING.md)**
@@ -134,6 +135,7 @@ AI agents are getting wallets. Coinbase's [x402 protocol](https://www.x402.org/)
 |------|------|-------------|
 | **Agent Demo** | [x402guard.dev/agent](https://x402guard.dev/agent) | Chat with an AI agent that queries guardrails, simulates payments, and reads audit logs in real time |
 | **Dashboard** | [x402guard.dev](https://x402guard.dev) | Connect wallet, monitor agents, configure rules, view spend analytics |
+| **Documentation** | [x402guard.dev/docs](https://x402guard.dev/docs) | API reference, integration guides, and configuration docs |
 | **Health Check** | [API /health](https://x402guard-production.up.railway.app/api/v1/health) | Proxy status endpoint — returns JSON with service version and Redis status |
 | **ElizaOS Security** | [/use-cases/elizaos-agent-security](https://x402guard.dev/use-cases/elizaos-agent-security) | Non-custodial guardrails for ElizaOS agents |
 | **DeFi Spend Limits** | [/use-cases/defi-spend-limits](https://x402guard.dev/use-cases/defi-spend-limits) | Per-transaction and daily spend caps for AI DeFi agents |
