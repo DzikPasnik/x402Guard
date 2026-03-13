@@ -1,0 +1,14 @@
+# Known false positives — gitleaks fingerprint allowlist
+# Format: commit:file:ruleID:line
+
+# README.md line 92: 'dev-api-key-change-me' — placeholder example value
+32d946c984839f062cd4659a7c623c69fa7041b5:README.md:curl-auth-header:92
+
+# examples/cod3x/demo/demo.ts line 38: Hardhat/Anvil default test private key
+# (public key from hardhat.org docs — NOT a real secret)
+7c8940176c9a86231730ad26a6fa65a65137bf43:examples/cod3x/demo/demo.ts:generic-api-key:38
+
+# .planning/RESEARCH-auth.md lines 590-591: truncated JWT placeholders (eyJ...)
+# showing format only — not valid tokens, never usable
+02de9fbe6c7b2a3ad1ba4d54e7ade893622ac8c1:.planning/phases/04-dashboard/RESEARCH-auth.md:generic-api-key:590
+02de9fbe6c7b2a3ad1ba4d54e7ade893622ac8c1:.planning/phases/04-dashboard/RESEARCH-auth.md:generic-api-key:591
