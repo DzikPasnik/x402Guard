@@ -17,6 +17,7 @@ import {
   Copy,
   Check,
 } from "lucide-react"
+import SiteHeader from "@/components/SiteHeader"
 import GradientText from "@/components/GradientText"
 import ScrollFloat from "@/components/ScrollFloat"
 import SpotlightCard from "@/components/SpotlightCard"
@@ -132,32 +133,7 @@ function MethodBadge({ method }: { method: string }) {
 export function DocsContent() {
   return (
     <div className="flex min-h-screen flex-col bg-[#09090b] text-white font-[family-name:var(--font-geist-sans)]">
-      {/* Nav */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#09090b]/80 backdrop-blur-sm">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            <span className="font-bold">x402Guard</span>
-          </Link>
-          <nav className="flex items-center gap-4">
-            <Link
-              href="https://github.com/DzikPasnik/x402Guard"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-white/50 hover:text-white flex items-center gap-1.5"
-            >
-              <Github className="h-4 w-4" />
-              GitHub
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex items-center rounded-md border border-white/20 bg-white/5 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10 transition-colors"
-            >
-              Launch Dashboard
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <div className="mx-auto w-full max-w-6xl flex flex-1">
         {/* Sidebar */}

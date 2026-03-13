@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
+import SiteHeader from "@/components/SiteHeader"
 import CountUp from "@/components/CountUp"
 import DecryptedText from "@/components/DecryptedText"
 import GradientText from "@/components/GradientText"
@@ -29,33 +30,7 @@ const Aurora = dynamic(() => import("@/components/Aurora"), { ssr: false })
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-[#09090b] text-white font-[family-name:var(--font-geist-sans)]">
-      {/* Nav */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#09090b]/80 backdrop-blur-sm">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            <span className="font-bold">x402Guard</span>
-            <Badge variant="secondary" className="text-[10px] bg-white/10 text-white/70 border-0">BETA</Badge>
-          </div>
-          <nav className="flex items-center gap-4">
-            <Link
-              href="https://github.com/DzikPasnik/x402Guard"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-white/50 hover:text-white flex items-center gap-1.5"
-            >
-              <Github className="h-4 w-4" />
-              GitHub
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex items-center rounded-md border border-white/20 bg-white/5 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10 transition-colors"
-            >
-              Launch Dashboard
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="flex-1">
         {/* ========================= */}
