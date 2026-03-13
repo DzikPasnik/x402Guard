@@ -22,8 +22,12 @@ jobs:
 
       - name: GitLeaks - Scan for hardcoded secrets
         run: |
-          curl -sSfL https://raw.githubusercontent.com/gitleaks/gitleaks/HEAD/scripts/install.sh | sh -s -- -b /usr/local/bin
+          VERSION=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" | tar -xz gitleaks
+          chmod +x gitleaks && sudo mv gitleaks /usr/local/bin/
           gitleaks detect --source . --no-banner --redact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check .gitignore compliance
         run: |
