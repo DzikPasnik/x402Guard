@@ -48,9 +48,8 @@ solana/target/
 CLAUDE.md
 
 # Internal docs (not for public)
+.planning/
 tasks/
 beta-test/
 demo/
 SECURITY_FINDINGS_VISUAL.txt
-.planning/security-audit/
-.planning/promotion/x402-foundation-application.md
