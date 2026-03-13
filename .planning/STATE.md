@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**Security Hardening** --- IN PROGRESS (6 CRITICAL fixed, HIGH/MEDIUM remaining)
+**Post-Launch Polish** --- All phases complete, production live
 
 (Phase 0: Repository Setup & Infrastructure --- COMPLETE)
 (Phase 1: Core x402 Proxy + Payment Verification --- COMPLETE)
@@ -115,7 +115,7 @@
 ### Phase 4 --- Dashboard (Full Control UI) (COMPLETE)
 - [x] Next.js 16 App Router + React 19 + Tailwind 4 + shadcn/ui v3
 - [x] Supabase Auth with RainbowKit/wagmi wallet connect
-- [x] SIWE (Sign In with Ethereum) auth flow (needs debugging)
+- [x] SIWE (Sign In with Ethereum) auth flow (FIXED 2026-03-11: createBrowserClient + window.location.href)
 - [x] DEV_SKIP_AUTH bypass for local development
 - [x] Agent overview page with spend monitoring (24h spend, daily limit, progress bar)
 - [x] Guardrail rule CRUD UI (create, delete per agent)
@@ -202,14 +202,28 @@ cd solana && anchor test
 cd solana && anchor deploy --provider.cluster devnet
 ```
 
+### Post-Launch (2026-03-11 -- 2026-03-13)
+- [x] SIWE auth fix: createBrowserClient + window.location.href (session in cookies, not localStorage)
+- [x] Agent demo: AI chat with 7 tools (Vercel AI SDK v6 + Anthropic Claude)
+- [x] Profile dropdown with logout + GitHub link in header
+- [x] Professional README redesign
+- [x] Domain x402guard.dev: DNS (A + CNAME), Vercel SSL, HTTP 200
+- [x] SEO: metadata, OG image, Twitter card, sitemap, robots.txt
+- [x] WeatherBot CLI demo: 5-step flow, interactive + auto modes (854 LOC)
+- [x] Docker Compose out-of-the-box setup
+- [x] Security: removed internal files from public repo
+- [x] Rate limiting on /api/auth/verify (Upstash Redis, 5 req/60s)
+
 ## Context for Next Session
 
-All 6 phases COMPLETE + security audit done. 106 proxy tests + 13 Solana tests. Remaining:
-- SIWE auth flow needs debugging (DEV_SKIP_AUTH workaround active)
+All 6 phases COMPLETE. Production live on Railway + Vercel. 106 proxy tests + 13 Solana tests.
+SIWE auth: FIXED. Domain x402guard.dev: LIVE. Agent demo + WeatherBot demo: DONE.
+
+Remaining:
 - HIGH/MEDIUM audit issues (CI scanning, logging, DNS rebinding)
-- Solana build verification with CRITICAL-5/6 changes
-- E2E tests for dashboard
-- Deploy to staging/devnet
+- npm publish @x402guard/core
+- Demo video recording
+- dev.to article, community outreach, grant submissions
 
 ---
-*Updated: 2026-03-01*
+*Updated: 2026-03-13*
