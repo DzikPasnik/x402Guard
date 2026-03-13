@@ -32,7 +32,9 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     if (!key) return
 
     posthog.init(key, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
+      // Route through our own domain to bypass ad blockers (see next.config.ts rewrites)
+      api_host: "/ingest",
+      ui_host: "https://us.posthog.com",
       // Manual pageview tracking via PostHogPageView component
       capture_pageview: false,
       // Track page leaves for bounce rate analytics
