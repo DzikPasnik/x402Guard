@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_URL = "https://x402guard.dev";
-const TITLE = "x402Guard — Guardrails for Autonomous DeFi Agents";
+const TITLE = "x402Guard — AI Agent Security & DeFi Guardrails";
 const DESCRIPTION =
-  "Non-custodial x402 safety proxy that enforces spend limits, contract whitelists, and EIP-7702 session keys on every payment your AI agent makes. Open-source security for ElizaOS, Virtuals, and Cod3x agents on Base + Solana.";
+  "Non-custodial AI agent security proxy. Enforce spend limits, contract whitelists, and session keys on every DeFi payment your autonomous agent makes. Open-source guardrails for ElizaOS, Virtuals, and Cod3x on Base + Solana.";
 const OG_DESCRIPTION =
-  "Open-source, non-custodial DeFi agent security. Spend limits, contract whitelists, session keys, immutable audit log. Supports ElizaOS, Virtuals, Cod3x on Base + Solana.";
+  "Open-source AI agent security for DeFi. Spend limits, contract whitelists, session keys, immutable audit log. Non-custodial guardrails for ElizaOS, Virtuals, Cod3x on Base + Solana.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -29,18 +29,21 @@ export const metadata: Metadata = {
   },
   description: DESCRIPTION,
   keywords: [
-    "DeFi agent security",
-    "AI agent guardrails",
-    "x402 protocol",
-    "spend limits",
-    "contract whitelist",
-    "EIP-7702 session keys",
-    "ElizaOS plugin",
-    "non-custodial proxy",
-    "Base blockchain",
-    "Solana security",
+    "AI agent security",
+    "DeFi agent guardrails",
     "autonomous agent safety",
-    "AI DeFi",
+    "AI agent spend limits",
+    "DeFi agent security",
+    "non-custodial AI proxy",
+    "ElizaOS security plugin",
+    "Virtuals agent guardrails",
+    "contract whitelist DeFi",
+    "x402 protocol security",
+    "EIP-7702 session keys",
+    "Base blockchain agent",
+    "Solana AI agent",
+    "AI DeFi firewall",
+    "autonomous agent guardrails",
   ],
   authors: [{ name: "x402Guard", url: SITE_URL }],
   openGraph: {
@@ -60,6 +63,33 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "x402Guard",
+  applicationCategory: "SecurityApplication",
+  operatingSystem: "Web",
+  url: SITE_URL,
+  description: DESCRIPTION,
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  license: "https://opensource.org/licenses/MIT",
+  codeRepository: "https://github.com/DzikPasnik/x402Guard",
+  featureList: [
+    "AI agent spend limits",
+    "Contract address whitelist",
+    "EIP-7702 session keys",
+    "Immutable audit log",
+    "ElizaOS plugin",
+    "Virtuals protocol integration",
+    "Base blockchain support",
+    "Solana support",
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -67,6 +97,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
