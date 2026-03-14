@@ -16,6 +16,7 @@ import {
   ExternalLink,
   Copy,
   Check,
+  Package,
 } from "lucide-react"
 import SiteHeader from "@/components/SiteHeader"
 import GradientText from "@/components/GradientText"
@@ -57,6 +58,7 @@ function CodeBlock({ code, lang = "bash" }: { code: string; lang?: string }) {
 }
 
 const navSections = [
+  { id: "sdk-install", label: "SDK Installation", icon: Package },
   { id: "quick-start", label: "Quick Start", icon: Rocket },
   { id: "api-reference", label: "API Reference", icon: Code2 },
   { id: "guardrails", label: "Guardrail Rules", icon: Shield },
@@ -210,7 +212,67 @@ export function DocsContent() {
                 Quick Start
               </ScrollFloat>
 
-            <h3 className="font-semibold mb-3 text-white/90">Option A: Docker Compose (recommended)</h3>
+            {/* SDK Installation */}
+            <div id="sdk-install" className="scroll-mt-20 mb-10">
+              <h3 className="text-xl font-bold mb-4 text-white/90 flex items-center gap-2">
+                <Package className="h-5 w-5 text-blue-400" />
+                Install the SDK
+              </h3>
+              <p className="text-white/60 mb-4 text-sm">
+                The fastest way to get started. Install the core SDK and connect to the proxy in under a minute.
+              </p>
+              <CodeBlock code="npm install @x402guard/core" />
+
+              <p className="text-white/60 mt-6 mb-3 text-sm">Complete working example:</p>
+              <CodeBlock lang="typescript" code={`import { X402GuardClient } from "@x402guard/core";
+
+const client = new X402GuardClient({
+  proxyUrl: "https://x402guard-production.up.railway.app",
+  agentId: "your-agent-uuid",
+  apiKey: "your-api-key",
+});
+
+// Check proxy health
+const alive = await client.healthCheck();
+
+// Add guardrail: max $10 USDC per transaction
+await client.createRule(agentId, {
+  rule_type: { type: "MaxSpendPerTx", params: { limit: 10_000_000 } },
+});
+
+// Route payment through the proxy
+const result = await client.proxyPayment({
+  targetUrl: "https://api.example.com/paid-endpoint",
+  x402Payment: "<signed-x402-payment>",
+  x402Requirements: "<requirements-header>",
+  agentId: "your-agent-uuid",
+});`} />
+
+              <div className="mt-4 flex gap-4 text-xs">
+                <Link
+                  href="https://www.npmjs.com/package/@x402guard/core"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:underline flex items-center gap-1"
+                >
+                  <Package className="h-3 w-3" />
+                  npm package
+                  <ExternalLink className="h-3 w-3" />
+                </Link>
+                <Link
+                  href="https://github.com/DzikPasnik/x402Guard/tree/main/examples/core"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/40 hover:text-white/70 flex items-center gap-1"
+                >
+                  <Github className="h-3 w-3" />
+                  Source on GitHub
+                  <ExternalLink className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+
+            <h3 className="font-semibold mb-3 text-white/90">Option A: Docker Compose</h3>
             <CodeBlock code={`git clone https://github.com/DzikPasnik/x402Guard.git
 cd x402Guard
 docker compose up
