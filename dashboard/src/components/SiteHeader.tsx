@@ -1,8 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
-import { Github } from "lucide-react"
+import { Shield, Github } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 const navLinks = [
@@ -17,7 +16,7 @@ export default function SiteHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="x402Guard" width={20} height={20} className="rounded-sm" />
+            <Shield className="h-5 w-5" />
             <span className="font-bold">x402Guard</span>
             <Badge
               variant="secondary"
