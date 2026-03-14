@@ -8,6 +8,7 @@ Ready-to-use integrations for popular AI agent frameworks.
 | [elizaos](elizaos/) | TypeScript | [ElizaOS](https://elizaos.ai) | AI agent plugin for ElizaOS characters |
 | [virtuals](virtuals/) | Python | [Virtuals GAME SDK](https://virtuals.io) | Python integration for Virtuals Protocol agents |
 | [cod3x](cod3x/) | TypeScript | [Cod3x](https://cod3x.org) | DeFi-focused adapter for Cod3x SDK |
+| [openclaw](openclaw/) | TypeScript | [OpenClaw](https://openclaw.ai) | Plugin for the most popular open-source AI agent |
 
 ## Getting Started
 

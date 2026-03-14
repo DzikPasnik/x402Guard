@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 const SITE_URL = "https://x402guard.dev";
 const TITLE = "x402Guard — AI Agent Security & DeFi Guardrails";
 const DESCRIPTION =
-  "Non-custodial AI agent security proxy. Enforce spend limits, contract whitelists, and session keys on every DeFi payment your autonomous agent makes. Open-source guardrails for ElizaOS, Virtuals, and Cod3x on Base + Solana.";
+  "Non-custodial AI agent security proxy. Enforce spend limits, contract whitelists, and session keys on every DeFi payment your autonomous agent makes. Open-source guardrails for ElizaOS, Virtuals, Cod3x, and OpenClaw on Base + Solana.";
 const OG_DESCRIPTION =
-  "Open-source AI agent security for DeFi. Spend limits, contract whitelists, session keys, immutable audit log. Non-custodial guardrails for ElizaOS, Virtuals, Cod3x on Base + Solana.";
+  "Open-source AI agent security for DeFi. Spend limits, contract whitelists, session keys, immutable audit log. Non-custodial guardrails for ElizaOS, Virtuals, Cod3x, OpenClaw on Base + Solana.";
 
 export const viewport: Viewport = {
   themeColor: [
@@ -44,6 +44,7 @@ export const metadata: Metadata = {
     "non-custodial AI proxy",
     "ElizaOS security plugin",
     "Virtuals agent guardrails",
+    "OpenClaw AI agent plugin",
     "contract whitelist DeFi",
     "x402 protocol security",
     "EIP-7702 session keys",

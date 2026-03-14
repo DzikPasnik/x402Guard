@@ -59,6 +59,7 @@ export class X402GuardClient {
     const merged = {
       proxyUrl: config.proxyUrl ?? process.env.X402GUARD_PROXY_URL,
       agentId: config.agentId ?? process.env.X402GUARD_AGENT_ID,
+      apiKey: config.apiKey ?? process.env.X402GUARD_API_KEY,
       logLevel: config.logLevel,
       maxRetries: config.maxRetries,
       retryBaseMs: config.retryBaseMs,
@@ -275,12 +276,18 @@ export class X402GuardClient {
   ): Promise<T> {
     const url = `${this.baseUrl}/api/v1${path}`;
 
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    if (this.config.apiKey) {
+      headers["X-Api-Key"] = this.config.apiKey;
+    }
+
     const init: RequestInit = {
       method,
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers,
     };
 
     if (body !== undefined) {

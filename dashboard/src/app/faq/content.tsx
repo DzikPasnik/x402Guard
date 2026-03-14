@@ -69,7 +69,7 @@ const faqs = [
     items: [
       {
         q: "Which AI agent frameworks does x402Guard support?",
-        a: "x402Guard has official plugins for ElizaOS, Virtuals Protocol, and Cod3x. Any agent using the x402 protocol can also be secured by routing payments through the x402Guard proxy endpoint.",
+        a: "x402Guard has official plugins for ElizaOS, Virtuals Protocol, Cod3x, and OpenClaw. Any agent using the x402 protocol can also be secured by routing payments through the x402Guard proxy endpoint.",
       },
       {
         q: "Which blockchains are supported?",
@@ -77,7 +77,7 @@ const faqs = [
       },
       {
         q: "How long does integration take?",
-        a: "For ElizaOS, Virtuals, or Cod3x: install the plugin, set your proxy URL and guardrail config — about 5 minutes. For custom agents: configure your agent to route x402 payments through the x402Guard proxy endpoint instead of directly to the network.",
+        a: "For ElizaOS, Virtuals, Cod3x, or OpenClaw: install the plugin, set your proxy URL and guardrail config — about 5 minutes. For custom agents: configure your agent to route x402 payments through the x402Guard proxy endpoint instead of directly to the network.",
       },
     ],
   },

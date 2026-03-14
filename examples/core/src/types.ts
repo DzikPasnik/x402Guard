@@ -172,6 +172,7 @@ export const x402GuardConfigSchema = z.object({
     .string()
     .url("proxyUrl must be a valid URL"),
   agentId: z.string().optional(),
+  apiKey: z.string().optional(),
   logLevel: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
     .optional(),

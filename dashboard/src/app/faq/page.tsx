@@ -83,7 +83,7 @@ const faqJsonLd = {
       name: "Which AI agent frameworks does x402Guard support?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "x402Guard supports ElizaOS, Virtuals Protocol, and Cod3x through official plugins. Any agent that makes x402 payments can also be secured by routing payments through the x402Guard proxy endpoint.",
+        text: "x402Guard supports ElizaOS, Virtuals Protocol, Cod3x, and OpenClaw through official plugins. Any agent that makes x402 payments can also be secured by routing payments through the x402Guard proxy endpoint.",
       },
     },
     {

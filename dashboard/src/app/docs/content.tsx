@@ -378,6 +378,13 @@ curl -X POST -H "X-Api-Key: $API_KEY" -H "Content-Type: application/json" \\
                   github: "https://github.com/DzikPasnik/x402Guard/tree/main/examples/cod3x",
                 },
                 {
+                  name: "OpenClaw",
+                  lang: "TypeScript",
+                  install: "openclaw plugins install @x402guard/openclaw-plugin",
+                  link: null,
+                  github: "https://github.com/DzikPasnik/x402Guard/tree/main/examples/openclaw",
+                },
+                {
                   name: "@x402guard/core",
                   lang: "TypeScript",
                   install: "npm install @x402guard/core",

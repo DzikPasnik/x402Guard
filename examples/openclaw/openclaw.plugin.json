@@ -1,0 +1,38 @@
+{
+  "id": "x402guard",
+  "name": "x402Guard DeFi Safety Proxy",
+  "description": "Non-custodial guardrail proxy for AI agent DeFi payments on Base (EVM) and Solana. Enforces spend limits, contract whitelists, and leverage caps before transactions hit the chain.",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["proxyUrl"],
+    "properties": {
+      "proxyUrl": {
+        "type": "string",
+        "description": "URL of the x402Guard proxy (e.g. https://x402guard-production.up.railway.app)"
+      },
+      "agentId": {
+        "type": "string",
+        "description": "Default agent UUID for all tool calls (optional — can be passed per-call)"
+      },
+      "apiKey": {
+        "type": "string",
+        "description": "API key for authenticated proxy endpoints"
+      }
+    }
+  },
+  "uiHints": {
+    "proxyUrl": {
+      "label": "Proxy URL",
+      "placeholder": "https://x402guard-production.up.railway.app"
+    },
+    "agentId": {
+      "label": "Agent ID",
+      "placeholder": "a218d698-f37f-4351-b6e9-..."
+    },
+    "apiKey": {
+      "label": "API Key",
+      "sensitive": true
+    }
+  }
+}
