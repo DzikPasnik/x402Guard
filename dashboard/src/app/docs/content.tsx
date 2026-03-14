@@ -202,13 +202,13 @@ export function DocsContent() {
           {/* Quick Start */}
           <section id="quick-start" className="mb-16 scroll-mt-20">
             <ScrollFloat
-              containerClassName="mb-6"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              Quick Start
-            </ScrollFloat>
+                containerClassName="mb-6"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                Quick Start
+              </ScrollFloat>
 
             <h3 className="font-semibold mb-3 text-white/90">Option A: Docker Compose (recommended)</h3>
             <CodeBlock code={`git clone https://github.com/DzikPasnik/x402Guard.git
@@ -245,13 +245,13 @@ await client.addRule(agent.id, {
           {/* API Reference */}
           <section id="api-reference" className="mb-16 scroll-mt-20">
             <ScrollFloat
-              containerClassName="mb-6"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              API Reference
-            </ScrollFloat>
+                containerClassName="mb-6"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                API Reference
+              </ScrollFloat>
             <p className="text-white/60 mb-6">All endpoints are under <code className="bg-white/10 px-1.5 rounded text-xs">/api/v1</code>. Base URL for production: <code className="bg-white/10 px-1.5 rounded text-xs">https://x402guard-production.up.railway.app</code></p>
 
             <div className="rounded-lg border border-white/10 overflow-hidden">
@@ -279,13 +279,13 @@ await client.addRule(agent.id, {
           {/* Guardrail Rules */}
           <section id="guardrails" className="mb-16 scroll-mt-20">
             <ScrollFloat
-              containerClassName="mb-6"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              Guardrail Rules
-            </ScrollFloat>
+                containerClassName="mb-6"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                Guardrail Rules
+              </ScrollFloat>
             <p className="text-white/60 mb-6">
               Create guardrail rules via <code className="bg-white/10 px-1.5 rounded text-xs">POST /api/v1/agents/{"{id}"}/rules</code>.
               Each rule is evaluated on every payment request. If any rule is violated, the payment is rejected.
@@ -310,13 +310,13 @@ await client.addRule(agent.id, {
           {/* Session Keys */}
           <section id="session-keys" className="mb-16 scroll-mt-20">
             <ScrollFloat
-              containerClassName="mb-6"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              Session Keys (EIP-7702)
-            </ScrollFloat>
+                containerClassName="mb-6"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                Session Keys (EIP-7702)
+              </ScrollFloat>
             <p className="text-white/60 mb-6">
               Session keys give your agent limited signing authority that auto-expires. Create them via the dashboard or API.
             </p>
@@ -346,13 +346,13 @@ curl -X POST -H "X-Api-Key: $API_KEY" -H "Content-Type: application/json" \\
           {/* Integrations */}
           <section id="integrations" className="mb-16 scroll-mt-20">
             <ScrollFloat
-              containerClassName="mb-6"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              Integrations
-            </ScrollFloat>
+                containerClassName="mb-6"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                Integrations
+              </ScrollFloat>
 
             <div className="grid gap-4 sm:grid-cols-2">
               {[
@@ -417,13 +417,13 @@ curl -X POST -H "X-Api-Key: $API_KEY" -H "Content-Type: application/json" \\
           {/* Solana */}
           <section id="solana" className="mb-16 scroll-mt-20">
             <ScrollFloat
-              containerClassName="mb-6"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              Solana Vault
-            </ScrollFloat>
+                containerClassName="mb-6"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                Solana Vault
+              </ScrollFloat>
             <p className="text-white/60 mb-6">
               The Solana guard is an Anchor program that creates a PDA vault with on-chain guardrails:
               per-transaction limits, daily caps, and a program whitelist.
@@ -453,13 +453,13 @@ anchor test`} />
           {/* Self-Hosting */}
           <section id="self-hosting" className="mb-16 scroll-mt-20">
             <ScrollFloat
-              containerClassName="mb-6"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              Self-Hosting
-            </ScrollFloat>
+                containerClassName="mb-6"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                Self-Hosting
+              </ScrollFloat>
             <p className="text-white/60 mb-6">
               x402Guard is fully self-hostable. You need PostgreSQL, Redis, and the Rust proxy binary.
             </p>

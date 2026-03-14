@@ -113,13 +113,13 @@ export function ContractWhitelistContent() {
         <section className="py-16 px-6 border-b border-white/10 bg-white/[0.02]">
           <div className="mx-auto max-w-5xl">
             <ScrollFloat
-              containerClassName="mb-8"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              How AI agents get tricked into paying wrong addresses
-            </ScrollFloat>
+                containerClassName="mb-8"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                How AI agents get tricked into paying wrong addresses
+              </ScrollFloat>
             <div className="grid gap-6 sm:grid-cols-3">
               {attacks.map((attack) => (
                 <SpotlightCard key={attack.name} className="p-5" spotlightColor="rgba(220,38,38,0.15)">
@@ -194,13 +194,13 @@ export function ContractWhitelistContent() {
         <section className="py-16 px-6 border-b border-white/10 bg-white/[0.02]">
           <div className="mx-auto max-w-5xl">
             <ScrollFloat
-              containerClassName="mb-4"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              Dual authority + address check
-            </ScrollFloat>
+                containerClassName="mb-4"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                Dual authority + address check
+              </ScrollFloat>
             <p className="text-white/60 max-w-2xl mb-8 leading-relaxed">
               x402Guard validates both the payment facilitator authority and the destination contract address.
               An attacker cannot bypass the whitelist by changing one while leaving the other intact.

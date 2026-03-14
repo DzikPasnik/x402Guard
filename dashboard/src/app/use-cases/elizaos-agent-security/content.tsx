@@ -162,13 +162,13 @@ export function ElizaOSContent() {
         <section className="py-16 px-6 border-b border-white/10 bg-white/[0.02]">
           <div className="mx-auto max-w-5xl">
             <ScrollFloat
-              containerClassName="mb-8"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              The problem with unguarded ElizaOS agents
-            </ScrollFloat>
+                containerClassName="mb-8"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                The problem with unguarded ElizaOS agents
+              </ScrollFloat>
             <div className="grid gap-4 sm:grid-cols-3">
               {[
                 { title: "No spend cap", text: "A buggy prompt or compromised tool can instruct your agent to drain its entire wallet in one transaction." },
@@ -247,13 +247,13 @@ export function ElizaOSContent() {
         <section className="py-16 px-6 border-b border-white/10">
           <div className="mx-auto max-w-5xl">
             <ScrollFloat
-              containerClassName="mb-8"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              Non-custodial by design
-            </ScrollFloat>
+                containerClassName="mb-8"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                Non-custodial by design
+              </ScrollFloat>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { icon: Lock, text: "x402Guard never holds your private keys", color: "text-green-400" },

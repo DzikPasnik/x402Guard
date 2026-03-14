@@ -26,6 +26,39 @@ export const metadata: Metadata = {
   },
 }
 
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://x402guard.dev",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Use Cases",
+      item: "https://x402guard.dev/use-cases",
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: "Contract Whitelist",
+      item: "https://x402guard.dev/use-cases/contract-whitelist",
+    },
+  ],
+}
+
 export default function ContractWhitelistPage() {
-  return <ContractWhitelistContent />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <ContractWhitelistContent />
+    </>
+  )
 }

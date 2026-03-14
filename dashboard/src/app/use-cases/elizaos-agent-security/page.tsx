@@ -25,6 +25,39 @@ export const metadata: Metadata = {
   },
 }
 
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://x402guard.dev",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Use Cases",
+      item: "https://x402guard.dev/use-cases",
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: "ElizaOS Agent Security",
+      item: "https://x402guard.dev/use-cases/elizaos-agent-security",
+    },
+  ],
+}
+
 export default function ElizaOSAgentSecurityPage() {
-  return <ElizaOSContent />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <ElizaOSContent />
+    </>
+  )
 }
