@@ -43,17 +43,17 @@ function getAgentRatelimit(): Ratelimit | null {
 }
 
 // ---------------------------------------------------------------------------
-// Supabase singleton — uses ANON key so RLS is enforced
+// Supabase singleton — server-side only, scoped to DEMO_AGENT_ID
 // ---------------------------------------------------------------------------
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
 let _supabase: SupabaseClient | null = null;
 
 function getSupabase(): SupabaseClient {
   if (!_supabase) {
-    _supabase = createClient(supabaseUrl, supabaseAnonKey);
+    _supabase = createClient(supabaseUrl, supabaseServiceKey);
   }
   return _supabase;
 }
@@ -140,7 +140,7 @@ const agentTools: ToolSet = {
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 5_000);
-        const res = await fetch(`${PROXY_URL}/health`, {
+        const res = await fetch(`${PROXY_URL}/api/v1/health`, {
           signal: controller.signal,
         });
         clearTimeout(timeout);
