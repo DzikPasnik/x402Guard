@@ -208,13 +208,13 @@ export function DeFiSpendLimitsContent() {
         <section className="py-16 px-6 border-b border-white/10">
           <div className="mx-auto max-w-5xl">
             <ScrollFloat
-              containerClassName="mb-4"
-              textClassName="text-2xl font-bold text-white"
-              animationDuration={1}
-              stagger={0.03}
-            >
-              Atomic spend tracking — no TOCTOU race
-            </ScrollFloat>
+                containerClassName="mb-4"
+                textClassName="text-2xl font-bold text-white"
+                animationDuration={1}
+                stagger={0.03}
+              >
+                Atomic spend tracking — no TOCTOU race
+              </ScrollFloat>
             <p className="text-white/60 max-w-2xl mb-8 leading-relaxed">
               x402Guard tracks daily spend using atomic database operations. The check and update happen in a single atomic operation — no race window where two simultaneous payments slip under the cap.
             </p>
