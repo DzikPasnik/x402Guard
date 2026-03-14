@@ -4,7 +4,7 @@ import { HomeContent } from "./content"
 export const metadata: Metadata = {
   title: "x402Guard — Guardrails for Autonomous DeFi Agents",
   description:
-    "Non-custodial AI agent security proxy. Enforce spend limits, contract whitelists, and session keys on every DeFi payment your autonomous agent makes. Open-source guardrails for ElizaOS, Virtuals, Cod3x, and OpenClaw on Base + Solana.",
+    "Non-custodial AI agent security proxy. Enforce spend limits, contract whitelists, and session keys on every DeFi payment your agent makes.",
   openGraph: {
     title: "x402Guard — Guardrails for Autonomous DeFi Agents",
     description:
