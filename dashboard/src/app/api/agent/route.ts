@@ -43,19 +43,31 @@ function getAgentRatelimit(): Ratelimit | null {
 }
 
 // ---------------------------------------------------------------------------
-// Supabase singleton (server-side only)
+// Supabase singleton — uses ANON key so RLS is enforced
 // ---------------------------------------------------------------------------
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 let _supabase: SupabaseClient | null = null;
 
 function getSupabase(): SupabaseClient {
   if (!_supabase) {
-    _supabase = createClient(supabaseUrl, supabaseServiceKey);
+    _supabase = createClient(supabaseUrl, supabaseAnonKey);
   }
   return _supabase;
+}
+
+// ---------------------------------------------------------------------------
+// Demo agent scoping — fail closed if not configured
+// ---------------------------------------------------------------------------
+
+function getDemoAgentId(): string {
+  const id = process.env.DEMO_AGENT_ID;
+  if (!id) {
+    throw new Error("DEMO_AGENT_ID not configured — agent demo disabled");
+  }
+  return id;
 }
 
 // ---------------------------------------------------------------------------
@@ -142,15 +154,16 @@ const agentTools: ToolSet = {
 
   list_agents: {
     description:
-      "List registered agents from the database. Returns agent names, IDs, and active status.",
+      "List the demo agent registered in x402Guard. Returns agent name, ID, and active status.",
     inputSchema: z.object({}),
     execute: async () => {
+      const demoId = getDemoAgentId();
       const supabase = getSupabase();
       const { data, error } = await supabase
         .from("agents")
         .select("id, name, owner_address, is_active, created_at")
-        .order("created_at", { ascending: false })
-        .limit(10);
+        .eq("id", demoId)
+        .limit(1);
 
       if (error) return { error: error.message };
       return { agents: data ?? [] };
@@ -159,16 +172,15 @@ const agentTools: ToolSet = {
 
   get_guardrail_rules: {
     description:
-      "Get all active guardrail rules for a specific agent. Shows spend limits, allowed contracts, leverage limits, etc.",
-    inputSchema: z.object({
-      agent_id: z.string().uuid().describe("The UUID of the agent to query"),
-    }),
-    execute: async ({ agent_id }: { agent_id: string }) => {
+      "Get all active guardrail rules for the demo agent. Shows spend limits, allowed contracts, leverage limits, etc.",
+    inputSchema: z.object({}),
+    execute: async () => {
+      const demoId = getDemoAgentId();
       const supabase = getSupabase();
       const { data, error } = await supabase
         .from("guardrail_rules")
         .select("id, rule_type, is_active, created_at")
-        .eq("agent_id", agent_id)
+        .eq("agent_id", demoId)
         .eq("is_active", true);
 
       if (error) return { error: error.message };
@@ -178,18 +190,17 @@ const agentTools: ToolSet = {
 
   get_session_keys: {
     description:
-      "List session keys for an agent. Shows spending allowances, expiration, and revocation status.",
-    inputSchema: z.object({
-      agent_id: z.string().uuid().describe("The UUID of the agent to query"),
-    }),
-    execute: async ({ agent_id }: { agent_id: string }) => {
+      "List session keys for the demo agent. Shows spending allowances, expiration, and revocation status.",
+    inputSchema: z.object({}),
+    execute: async () => {
+      const demoId = getDemoAgentId();
       const supabase = getSupabase();
       const { data, error } = await supabase
         .from("session_keys")
         .select(
           "id, public_key, max_spend, spent, allowed_contracts, expires_at, is_revoked, created_at",
         )
-        .eq("agent_id", agent_id)
+        .eq("agent_id", demoId)
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -200,11 +211,10 @@ const agentTools: ToolSet = {
 
   get_spend_summary: {
     description:
-      "Get today's spending summary for an agent — total spent, number of transactions, and daily limit remaining.",
-    inputSchema: z.object({
-      agent_id: z.string().uuid().describe("The UUID of the agent to query"),
-    }),
-    execute: async ({ agent_id }: { agent_id: string }) => {
+      "Get today's spending summary for the demo agent — total spent, number of transactions, and daily limit remaining.",
+    inputSchema: z.object({}),
+    execute: async () => {
+      const demoId = getDemoAgentId();
       const supabase = getSupabase();
 
       // Get today's spend from ledger
@@ -214,7 +224,7 @@ const agentTools: ToolSet = {
       const { data: spendData, error: spendError } = await supabase
         .from("spend_ledger")
         .select("amount")
-        .eq("agent_id", agent_id)
+        .eq("agent_id", demoId)
         .gte("created_at", todayStart.toISOString());
 
       if (spendError) return { error: spendError.message };
@@ -228,7 +238,7 @@ const agentTools: ToolSet = {
       const { data: rules } = await supabase
         .from("guardrail_rules")
         .select("rule_type")
-        .eq("agent_id", agent_id)
+        .eq("agent_id", demoId)
         .eq("is_active", true);
 
       const dailyLimitRule = (rules ?? []).find(
@@ -253,9 +263,8 @@ const agentTools: ToolSet = {
 
   simulate_payment: {
     description:
-      "Simulate a payment through x402Guard proxy. This sends a real request to the production proxy to test guardrail enforcement. The proxy will check all active rules and either allow or block the payment.",
+      "Simulate a payment through x402Guard proxy using the demo agent. This sends a real request to the production proxy to test guardrail enforcement. The proxy will check all active rules and either allow or block the payment.",
     inputSchema: z.object({
-      agent_id: z.string().uuid().describe("The UUID of the agent making the payment"),
       amount_usdc: z
         .number()
         .min(0.001)
@@ -268,14 +277,13 @@ const agentTools: ToolSet = {
         .describe("The target service URL to pay"),
     }),
     execute: async ({
-      agent_id,
       amount_usdc,
       target_url,
     }: {
-      agent_id: string;
       amount_usdc: number;
       target_url: string;
     }) => {
+      const demoId = getDemoAgentId();
       const result = await proxyFetch("/proxy", {
         method: "POST",
         body: JSON.stringify({
@@ -288,7 +296,7 @@ const agentTools: ToolSet = {
             resource: target_url,
             description: `AI agent payment: ${amount_usdc} USDC`,
           }),
-          agentId: agent_id,
+          agentId: demoId,
         }),
       });
 
@@ -312,13 +320,8 @@ const agentTools: ToolSet = {
 
   get_audit_log: {
     description:
-      "Query the immutable audit log. Shows recent events like payments, guardrail violations, key revocations, etc.",
+      "Query the immutable audit log for the demo agent. Shows recent events like payments, guardrail violations, key revocations, etc.",
     inputSchema: z.object({
-      agent_id: z
-        .string()
-        .uuid()
-        .optional()
-        .describe("Optional: filter by agent UUID"),
       limit: z
         .number()
         .int()
@@ -327,26 +330,16 @@ const agentTools: ToolSet = {
         .default(10)
         .describe("Number of recent events to return (max 25)"),
     }),
-    execute: async ({
-      agent_id,
-      limit,
-    }: {
-      agent_id?: string;
-      limit: number;
-    }) => {
+    execute: async ({ limit }: { limit: number }) => {
+      const demoId = getDemoAgentId();
       const supabase = getSupabase();
 
-      let query = supabase
+      const { data, error } = await supabase
         .from("audit_events")
         .select("id, event_type, agent_id, details, created_at")
+        .eq("agent_id", demoId)
         .order("created_at", { ascending: false })
         .limit(limit);
-
-      if (agent_id) {
-        query = query.eq("agent_id", agent_id);
-      }
-
-      const { data, error } = await query;
 
       if (error) return { error: error.message };
       return { events: data ?? [] };
@@ -360,12 +353,14 @@ const agentTools: ToolSet = {
 
 const SYSTEM_PROMPT = `You are x402Guard Assistant — an AI agent that demonstrates the x402Guard security proxy for autonomous DeFi agents.
 
-You have tools to interact with the LIVE production x402Guard system:
+You have tools to interact with the LIVE production x402Guard system, scoped to a single demo agent:
 - Check proxy health
-- List registered agents and their guardrail rules
+- View the demo agent and its guardrail rules
 - View session keys and spending limits
 - Simulate payments to test guardrail enforcement
-- Query the immutable audit log
+- Query the audit log
+
+All tools are pre-scoped to the demo agent — you do NOT need to provide an agent_id.
 
 Your personality:
 - Security-focused, professional but friendly
@@ -375,8 +370,8 @@ Your personality:
 
 When users ask you to demonstrate x402Guard:
 1. First check proxy health
-2. List available agents
-3. Show their guardrail rules
+2. List the demo agent
+3. Show its guardrail rules
 4. Simulate a payment and show how rules are enforced
 5. Show the audit trail
 
@@ -409,6 +404,14 @@ export async function POST(req: Request) {
         },
       );
     }
+  }
+
+  // --- Fail-closed: demo agent must be configured ---
+  if (!process.env.DEMO_AGENT_ID) {
+    return new Response(
+      JSON.stringify({ error: "Agent demo is not configured" }),
+      { status: 503, headers: { "Content-Type": "application/json" } },
+    );
   }
 
   // --- API key check ---
