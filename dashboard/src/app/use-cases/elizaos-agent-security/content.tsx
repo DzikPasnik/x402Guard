@@ -11,6 +11,7 @@ import SpotlightCard from "@/components/SpotlightCard"
 import StarBorder from "@/components/StarBorder"
 import ScrollFloat from "@/components/ScrollFloat"
 import { Badge } from "@/components/ui/badge"
+import RelatedUseCases from "@/components/RelatedUseCases"
 
 const Aurora = dynamic(() => import("@/components/Aurora"), { ssr: false })
 
@@ -302,6 +303,10 @@ export function ElizaOSContent() {
             </StarBorder>
           </div>
         </section>
+
+        <div className="mx-auto max-w-4xl px-6">
+          <RelatedUseCases currentPath="/use-cases/elizaos-agent-security" />
+        </div>
       </main>
 
       <footer className="border-t border-white/10 py-8 px-6 text-center text-sm text-white/40">

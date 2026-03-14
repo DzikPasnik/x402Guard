@@ -28,6 +28,35 @@ export const metadata: Metadata = {
   },
 }
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: "x402Guard Documentation — API Reference & Integration Guide",
+  description:
+    "API reference, quick start guide, and integration docs for x402Guard — AI agent security proxy for DeFi.",
+  url: "https://x402guard.dev/docs",
+  author: {
+    "@type": "Organization",
+    name: "x402Guard",
+    url: "https://x402guard.dev",
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "x402Guard",
+    logo: { "@type": "ImageObject", url: "https://x402guard.dev/logo.png" },
+  },
+  datePublished: "2026-03-10",
+  dateModified: "2026-03-14",
+}
+
 export default function DocsPage() {
-  return <DocsContent />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <DocsContent />
+    </>
+  )
 }

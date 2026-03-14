@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 const SITE_URL = "https://x402guard.dev";
 const TITLE = "x402Guard — AI Agent Security & DeFi Guardrails";
 const DESCRIPTION =
-  "Non-custodial AI agent security proxy. Enforce spend limits, contract whitelists, and session keys on every DeFi payment your autonomous agent makes. Open-source guardrails for ElizaOS, Virtuals, Cod3x, and OpenClaw on Base + Solana.";
+  "Non-custodial AI agent security proxy. Enforce spend limits, contract whitelists, and session keys on every DeFi payment your agent makes.";
 const OG_DESCRIPTION =
   "Open-source AI agent security for DeFi. Spend limits, contract whitelists, session keys, immutable audit log. Non-custodial guardrails for ElizaOS, Virtuals, Cod3x, OpenClaw on Base + Solana.";
 
@@ -71,32 +71,43 @@ export const metadata: Metadata = {
   },
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "x402Guard",
-  applicationCategory: "SecurityApplication",
-  operatingSystem: "Web",
-  url: SITE_URL,
-  description: DESCRIPTION,
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "x402Guard",
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+    description: DESCRIPTION,
+    sameAs: ["https://github.com/DzikPasnik/x402Guard"],
   },
-  license: "https://opensource.org/licenses/MIT",
-  codeRepository: "https://github.com/DzikPasnik/x402Guard",
-  featureList: [
-    "AI agent spend limits",
-    "Contract address whitelist",
-    "EIP-7702 session keys",
-    "Immutable audit log",
-    "ElizaOS plugin",
-    "Virtuals protocol integration",
-    "Base blockchain support",
-    "Solana support",
-  ],
-};
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "x402Guard",
+    applicationCategory: "SecurityApplication",
+    operatingSystem: "Web",
+    url: SITE_URL,
+    description: DESCRIPTION,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    license: "https://opensource.org/licenses/MIT",
+    codeRepository: "https://github.com/DzikPasnik/x402Guard",
+    featureList: [
+      "AI agent spend limits",
+      "Contract address whitelist",
+      "EIP-7702 session keys",
+      "Immutable audit log",
+      "ElizaOS plugin",
+      "Virtuals protocol integration",
+      "Base blockchain support",
+      "Solana support",
+    ],
+  },
+];
 
 export default function RootLayout({
   children,
