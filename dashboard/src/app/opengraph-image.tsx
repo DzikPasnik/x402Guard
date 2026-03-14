@@ -17,7 +17,8 @@ export default function OGImage() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          background: "linear-gradient(135deg, #09090b 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%)",
+          background:
+            "linear-gradient(135deg, #09090b 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%)",
           fontFamily: "system-ui, sans-serif",
           position: "relative",
           overflow: "hidden",
@@ -32,7 +33,8 @@ export default function OGImage() {
             width: "400px",
             height: "400px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%)",
             display: "flex",
           }}
         />
@@ -44,26 +46,63 @@ export default function OGImage() {
             width: "500px",
             height: "500px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)",
             display: "flex",
           }}
         />
 
-        {/* Shield icon */}
+        {/* Shield logo in rounded square */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: "80px",
-            height: "80px",
-            borderRadius: "20px",
-            background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+            width: "100px",
+            height: "100px",
+            borderRadius: "22px",
+            background: "#1b2838",
             marginBottom: "24px",
-            fontSize: "40px",
+            position: "relative",
           }}
         >
-          🛡️
+          <svg
+            width="70"
+            height="70"
+            viewBox="0 0 130 130"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ position: "absolute" }}
+          >
+            <path
+              d="M65 10 L15 35 L15 70 Q15 105 65 125 Q115 105 115 70 L115 35 Z"
+              stroke="white"
+              strokeWidth="6"
+              fill="none"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M40 32 L55 22 L65 28 L75 22 L90 32"
+              stroke="white"
+              strokeWidth="5"
+              fill="none"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          </svg>
+          <div
+            style={{
+              display: "flex",
+              color: "white",
+              fontSize: "26px",
+              fontWeight: 800,
+              fontFamily: "system-ui, sans-serif",
+              letterSpacing: "-1px",
+              marginTop: "10px",
+            }}
+          >
+            X402
+          </div>
         </div>
 
         {/* Title */}
@@ -79,7 +118,8 @@ export default function OGImage() {
             style={{
               fontSize: "64px",
               fontWeight: 800,
-              background: "linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4)",
+              background:
+                "linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4)",
               backgroundClip: "text",
               color: "transparent",
               letterSpacing: "-2px",
@@ -112,25 +152,28 @@ export default function OGImage() {
             marginTop: "40px",
           }}
         >
-          {["Spend Limits", "Contract Whitelist", "Session Keys", "Audit Trail"].map(
-            (feature) => (
-              <div
-                key={feature}
-                style={{
-                  display: "flex",
-                  padding: "10px 20px",
-                  borderRadius: "999px",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  background: "rgba(255,255,255,0.05)",
-                  color: "#e4e4e7",
-                  fontSize: "16px",
-                  fontWeight: 500,
-                }}
-              >
-                {feature}
-              </div>
-            )
-          )}
+          {[
+            "Spend Limits",
+            "Contract Whitelist",
+            "Session Keys",
+            "Audit Trail",
+          ].map((feature) => (
+            <div
+              key={feature}
+              style={{
+                display: "flex",
+                padding: "10px 20px",
+                borderRadius: "999px",
+                border: "1px solid rgba(255,255,255,0.15)",
+                background: "rgba(255,255,255,0.05)",
+                color: "#e4e4e7",
+                fontSize: "16px",
+                fontWeight: 500,
+              }}
+            >
+              {feature}
+            </div>
+          ))}
         </div>
 
         {/* Bottom bar */}
@@ -155,6 +198,6 @@ export default function OGImage() {
         </div>
       </div>
     ),
-    { ...size }
+    { ...size },
   )
 }

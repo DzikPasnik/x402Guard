@@ -49,21 +49,57 @@ export default function OGImage() {
           }}
         />
 
-        {/* Shield icon */}
+        {/* Shield logo */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: "80px",
-            height: "80px",
-            borderRadius: "20px",
-            background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+            width: "100px",
+            height: "100px",
+            borderRadius: "22px",
+            background: "#1b2838",
             marginBottom: "24px",
-            fontSize: "40px",
+            position: "relative",
           }}
         >
-          🛡️
+          <svg
+            width="70"
+            height="70"
+            viewBox="0 0 130 130"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ position: "absolute" }}
+          >
+            <path
+              d="M65 10 L15 35 L15 70 Q15 105 65 125 Q115 105 115 70 L115 35 Z"
+              stroke="white"
+              strokeWidth="6"
+              fill="none"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M40 32 L55 22 L65 28 L75 22 L90 32"
+              stroke="white"
+              strokeWidth="5"
+              fill="none"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          </svg>
+          <div
+            style={{
+              display: "flex",
+              color: "white",
+              fontSize: "26px",
+              fontWeight: 800,
+              fontFamily: "system-ui, sans-serif",
+              letterSpacing: "-1px",
+              marginTop: "10px",
+            }}
+          >
+            X402
+          </div>
         </div>
 
         {/* Title */}
