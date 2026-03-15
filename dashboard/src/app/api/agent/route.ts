@@ -74,8 +74,10 @@ function getDemoAgentId(): string {
 // Proxy helpers
 // ---------------------------------------------------------------------------
 
-const PROXY_URL =
-  process.env.PROXY_URL ?? "https://x402guard-production.up.railway.app";
+const PROXY_URL = process.env.PROXY_URL;
+if (!PROXY_URL) {
+  throw new Error("PROXY_URL environment variable is not configured");
+}
 
 async function proxyFetch(path: string, options?: RequestInit) {
   const url = `${PROXY_URL}/api/v1${path}`;
