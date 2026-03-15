@@ -74,13 +74,16 @@ function getDemoAgentId(): string {
 // Proxy helpers
 // ---------------------------------------------------------------------------
 
-const PROXY_URL = process.env.PROXY_URL;
-if (!PROXY_URL) {
-  throw new Error("PROXY_URL environment variable is not configured");
+function getProxyUrl(): string {
+  const url = process.env.PROXY_URL;
+  if (!url) {
+    throw new Error("PROXY_URL environment variable is not configured");
+  }
+  return url;
 }
 
 async function proxyFetch(path: string, options?: RequestInit) {
-  const url = `${PROXY_URL}/api/v1${path}`;
+  const url = `${getProxyUrl()}/api/v1${path}`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
 
@@ -142,7 +145,7 @@ const agentTools: ToolSet = {
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 5_000);
-        const res = await fetch(`${PROXY_URL}/api/v1/health`, {
+        const res = await fetch(`${getProxyUrl()}/api/v1/health`, {
           signal: controller.signal,
         });
         clearTimeout(timeout);
